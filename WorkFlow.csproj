@@ -105,7 +105,8 @@
     <Compile Include="Controls\Workflow\WorkFlowItem.xaml.cs">
       <DependentUpon>WorkFlowItem.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Enums\ItemRotation.cs" />
+    <Compile Include="Enums\InputOutputConnectorPosition.cs" />
+    <Compile Include="Enums\NodeType.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="GestureRecognizer.cs" />
     <Compile Include="Interface\IWorkFlowEditor.cs" />

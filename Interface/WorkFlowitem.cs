@@ -16,7 +16,7 @@ namespace WorkFlow.Interface
      string Description { get; set; }
      
      Point Position { get; set; }
-     void ConstructControl();
+     void ConstructControl(IConnector[] connectors);
      IConnector AddConnector(IConnector connector);
      InputOutputConnectorPosition ConnectorLayout { get; set; }
         void ChangeOrientation(InputOutputConnectorPosition layout);
@@ -45,11 +45,13 @@ namespace WorkFlow.Interface
     {
         
         string Label { get; set; }
-        Action MouseIn { get; set; }
-        Action MouseOut { get; set; }
         IConnector Start { get; set; } 
         IConnector End { get; set; }
+        void MouseIn();
+        void MouseOut();
         void DrawPath(Point source, Point destination, float magic = 8);
+        void Delete();
+        event EventHandler<ILine> LineDeleted;
     }
     public enum ConnectorType
     {

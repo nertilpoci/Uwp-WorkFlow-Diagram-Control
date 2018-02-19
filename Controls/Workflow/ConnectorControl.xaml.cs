@@ -51,7 +51,7 @@ namespace WorkFlow.Controls.Workflow
 
         public bool CanConnect(ILine line)
         {
-            return line!=null && this.Type == ConnectorType.In && line.Start.WorkFlowItem != this.WorkFlowItem;
+            return line!=null && !this.Lines.Any(z=>z.Start==line.Start) && this.Type == ConnectorType.In && line.Start.WorkFlowItem != this.WorkFlowItem;
         }
 
         public void MouseIn()

@@ -5,10 +5,19 @@
     xmlns:local="using:WorkFlow.Controls.Workflow"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="d" Margin="0,5,0,5"
+             xmlns:winControls="using:Microsoft.Toolkit.Uwp.UI.Controls"
+
+    mc:Ignorable="d"
     d:DesignHeight="20"
     d:DesignWidth="20">
-
-    <Ellipse AllowDrop="True" x:Name="anchor" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Fill="#005b96" 
+    <winControls:DropShadowPanel BlurRadius="10.0"
+                          ShadowOpacity="0.70"
+                         
+                          Color="Black"
+                          HorizontalContentAlignment="Stretch"
+                          VerticalContentAlignment="Stretch">
+        <Ellipse AllowDrop="True" x:Name="anchor" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Fill="#005b96" 
                 />
+    </winControls:DropShadowPanel>
+   
 </UserControl>

@@ -16,6 +16,8 @@ namespace WorkFlow.Controls.Workflow
 {
     public class Line : Path, ILine
     {
+        private string normalStroke = "#4D648D";
+        private string mouseOverStroke = "#005b96";
         public Line()
         {
 
@@ -30,16 +32,37 @@ namespace WorkFlow.Controls.Workflow
             //            new GradientStop { Color= "#4D648D".HexToColor(),Offset=0.80 }
             //}
             //};
-            Stroke = new SolidColorBrush("#4D648D".HexToColor());
+            Stroke = new SolidColorBrush(normalStroke.HexToColor());
             StrokeThickness = 5;
             StrokeStartLineCap = PenLineCap.Square;
             StrokeEndLineCap = PenLineCap.Square;
-               
+            SetContextMenu();
             
         }
+
+        public event EventHandler<ILine> LineDeleted;
+        private void OnLineDeleted(ILine e)
+        {
+            LineDeleted?.Invoke(this, e);
+        }
+
+        private void SetContextMenu()
+        {
+            MenuFlyout lineMenu = new MenuFlyout();
+            MenuFlyoutItem deleteItem = new MenuFlyoutItem { Text = "Remove Connection", Icon = new SymbolIcon(Symbol.Delete) };
+            deleteItem.Click += DeleteLine;
+            lineMenu.Items.Add(deleteItem);
+            this.ContextFlyout = lineMenu;
+        }
+
+        private void DeleteLine(object sender, RoutedEventArgs e)
+        {
+            Delete();
+        }
+
         public string Label { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public Action MouseIn { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public Action MouseOut { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public void MouseIn () { Stroke = new SolidColorBrush(mouseOverStroke.HexToColor()); }
+        public void MouseOut() { Stroke = new SolidColorBrush(normalStroke.HexToColor()); }
         public IConnector Start { get; set; }
         public IConnector End { get; set; }
 
@@ -81,5 +104,16 @@ namespace WorkFlow.Controls.Workflow
             this.Data = geo;
             Canvas.SetZIndex(this, -2);
         }
+
+        public void Delete()
+        {
+            var start = this.Start;
+            var end = this.End;
+            start.Lines.Remove(this);
+            end.Lines.Remove(this);
+            OnLineDeleted(this);
+        }
+
+        
     }
 }

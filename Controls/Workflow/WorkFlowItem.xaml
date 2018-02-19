@@ -43,10 +43,10 @@
                 </StackPanel>
             <Border CornerRadius="20"  Margin="-10,0,-10,0"    x:Name="itemInfo" HorizontalAlignment="Stretch"  VerticalAlignment="Stretch" Background="#6E9ECF" >
                 <winControls:DropShadowPanel Color="Black"
-                          OffsetX="-50"
-                          OffsetY="-50"
-                          BlurRadius="50"
-                          ShadowOpacity=".7"
+                          OffsetX="-10"
+                          OffsetY="-10"
+                          BlurRadius="30"
+                          ShadowOpacity=".5"
                           
                           HorizontalContentAlignment="Stretch"
                           VerticalContentAlignment="Stretch">

@@ -104,19 +104,18 @@ namespace WorkFlow.Controls.Workflow
             return Element.TransformToVisual(parent).TransformPoint(new Point(0, 0)); ;
         }
 
-        public void ConstructControl()
+        public void ConstructControl(IConnector[] connectors)
         {
-            var inputConnector = new ConnectorControl { Type = ConnectorType.In, Label="In", Height=20, Width=20 };
-            var inputConnector2 = new ConnectorControl { Type = ConnectorType.In, Label="In", Height=20, Width=20 };
-            var outputConnector = new ConnectorControl { Type = ConnectorType.Out, Label="Out", Height = 20, Width = 20 };
 
-            AddConnector(inputConnector);
-            AddConnector(outputConnector);
-            AddConnector(inputConnector2);
+            foreach (var connector in connectors)
+            {
+            AddConnector(connector);
+                if (connector.Type == ConnectorType.In) inputConnectors.Children.Add(connector.Element);
+                else if (connector.Type == ConnectorType.Out) outputConnectors.Children.Add(connector.Element);
+            }
+           
 
-            inputConnectors.Children.Add(inputConnector);
-            inputConnectors.Children.Add(inputConnector2);
-            outputConnectors.Children.Add(outputConnector);
+            
         }
 
         public IConnector AddConnector(IConnector connector)

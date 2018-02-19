@@ -1,10 +1,12 @@
 ﻿
+using GalaSoft.MvvmLight.Command;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
+using System.Windows.Input;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.System;
@@ -20,6 +22,7 @@ using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
 using Windows.UI.Xaml.Shapes;
+using WorkFlow.Enums;
 using WorkFlow.Extensions;
 using WorkFlow.Interface;
 using WorkFlow.Models;
@@ -36,30 +39,52 @@ namespace WorkFlow.Controls.Workflow
         public WorkFlowEditor()
         {
             InitializeComponent();
+            this.DataContext = this;
 
            
             SetScrollViewerEvents();
             SetCanvasEvents();
-            AddTestControls();
+         
             LoopDetected += async (s, e) =>{
 
                 var dialog = new MessageDialog("This Connection creates a loop, loops are not allowed");
                 await dialog.ShowAsync();
             };
+            NewNodeCommand = new RelayCommand<NodeType>(CreateNode);
         }
-        private void AddTestControls()
-        {
-            var item1 = CreateNew();
-            var item2 = CreateNew();
 
-            WorkFlowItems.Add(item1);
-            WorkFlowItems.Add(item2);
-            editorCanvas.Children.Add(item1.Element);
-            editorCanvas.Children.Add(item2.Element);
-            Canvas.SetLeft(item1.Element, 200);
-            Canvas.SetTop(item2.Element, 200);
-
+        private void CreateNode(NodeType nodeType)
+        {//TODO better node generation, DI
+            switch (nodeType)
+            {
+                case NodeType.Trigger:
+                    var trigger=  CreateNewNode(new IConnector[] {  new ConnectorControl { Type = ConnectorType.Out, Label = "Output", Height = 25, Width = 25 } }, "Sample Trigger", "Test trigger node");
+                    WorkFlowItems.Add(trigger);
+                    editorCanvas.Children.Add(trigger.Element);
+                    Canvas.SetLeft(trigger.Element, _canvasLastRightTappedPoint.X);
+                    Canvas.SetTop(trigger.Element, _canvasLastRightTappedPoint.Y);
+                    break;
+                case NodeType.Action:
+                    var action = CreateNewNode(new IConnector[] { new ConnectorControl { Type = ConnectorType.In, Label = "In", Height = 25, Width = 25 }, new ConnectorControl { Type = ConnectorType.Out, Label = "Output", Height = 25, Width = 25 } }, "Sample Action", "Test action node");
+                    WorkFlowItems.Add(action);
+                    editorCanvas.Children.Add(action.Element);
+                    Canvas.SetLeft(action.Element, _canvasLastRightTappedPoint.X);
+                    Canvas.SetTop(action.Element, _canvasLastRightTappedPoint.Y);
+                    break;
+                case NodeType.Result:
+                    var result = CreateNewNode(new IConnector[] { new ConnectorControl { Type = ConnectorType.In, Label = "In", Height = 25, Width = 25 }, }, "Sample Result", "Test result node");
+                    WorkFlowItems.Add(result);
+                    editorCanvas.Children.Add(result.Element);
+                    Canvas.SetLeft(result.Element, _canvasLastRightTappedPoint.X);
+                    Canvas.SetTop(result.Element, _canvasLastRightTappedPoint.Y);
+                    break;
+                default:
+                    break;
+            }
         }
+
+    
+     
         private void SetScrollViewerEvents()
         {
             Point scrollPoint;
@@ -93,16 +118,14 @@ namespace WorkFlow.Controls.Workflow
                 sender.ReleasePointerCaptures();
             };
         }
+        private Point _canvasLastRightTappedPoint=new Point(100,100);
         private void SetCanvasEvents()
         {
                editorCanvas.IsRightTapEnabled = true;
-               editorCanvas.RightTapped += (s, e) => {
-                var position= e.GetPosition(editorCanvas);
-                var item = CreateNew();
-                Canvas.SetLeft(item.Element, position.X);
-                Canvas.SetTop(item.Element, position.Y);
-                editorCanvas.Children.Add(item.Element);
-                WorkFlowItems.Add(item);
+            editorCanvas.RightTapped += (s, e) =>
+            {
+                _canvasLastRightTappedPoint = e.GetPosition(editorCanvas);
+                
 
             };
 
@@ -145,13 +168,13 @@ namespace WorkFlow.Controls.Workflow
                 }
             }
         }
-        private IWorkFlowItem CreateNew()
+        private IWorkFlowItem CreateNewNode(IConnector[] connectors, string title, string description)
         {
             IWorkFlowItem item = new WorkFlowItem(editorCanvas);
             item.Element.RenderTransform = new TranslateTransform();
-            item.Title = "Sample Title";
-            item.Description = "Sample Description for the node";
-            item.ConstructControl();
+            item.Title =title;
+            item.Description = description;
+            item.ConstructControl(connectors);
 
             foreach (var connector in item.Connectors)
             {
@@ -169,7 +192,7 @@ namespace WorkFlow.Controls.Workflow
                         e.Handled = true;
                         connector.Point = e.GetCurrentPoint(editorCanvas).Position;
 
-                        MovingLine = ControlHelper.CreateLine(connector, null);
+                        MovingLine =CreateLine(connector, null);
                         connector.Lines.Add(MovingLine);
                         editorCanvas.Children.Add(MovingLine.Element);
                         SetResetConnectorCanConnect(MovingLine,WorkFlowItems);
@@ -188,6 +211,12 @@ namespace WorkFlow.Controls.Workflow
                         if (MovingLine != null)
                         {
                             e.Handled = true;
+
+                            if(!connector.CanConnect(MovingLine))
+                            {
+                                ConnectionCreateCleanup();
+                                return;
+                            }
 
                             if (IsLoop(MovingLine.Start,connector))
                             {
@@ -268,10 +297,34 @@ namespace WorkFlow.Controls.Workflow
                     MakeCanvasFit((int)this.ActualWidth, (int)this.ActualHeight);
                 }
             };
-
-
             return item;
+          
         }
+        public  ILine CreateLine(IConnector start, IConnector end)
+        {
+            var line = new Line
+
+            {
+                Start = start,
+                End = end
+            };
+            line.RightTapped += Line_RightTapped;
+            line.LineDeleted += Line_LineDeleted;
+            line.Element.PointerEntered += (s,e)=> { line.MouseIn(); };
+            line.Element.PointerExited += (s, e) => { line.MouseOut(); };
+            return line;
+        }
+        public ICommand NewNodeCommand { get; set; }
+        private void Line_RightTapped(object sender, RightTappedRoutedEventArgs e)
+        {
+            e.Handled = true;
+        }
+
+        private void Line_LineDeleted(object sender, ILine e)
+        {
+            this.editorCanvas.Children.Remove(e.Element);
+        }
+
         private void MakeCanvasFit(int minX, int minY)
         {
             var xPadding = 300;
@@ -331,22 +384,9 @@ namespace WorkFlow.Controls.Workflow
             return false;
         }
 
+
     }
-    public static class ControlHelper
-    {
-
-        public static ILine CreateLine(IConnector start, IConnector end)
-        {
-            var line = new Line
-
-            {
-                Start = start,
-                End = end
-            };
-
-            return line;
-        }
-    }
+   
 }
 
 
