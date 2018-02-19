@@ -167,5 +167,10 @@ namespace WorkFlow.Controls.Workflow
             }
             Move(GetPosition());
         }
+
+        private void SymbolIcon_Tapped(object sender, TappedRoutedEventArgs e)
+        {
+
+        }
     }
 }
