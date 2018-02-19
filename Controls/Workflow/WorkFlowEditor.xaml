@@ -15,7 +15,7 @@
     <Grid Name="container"    HorizontalAlignment="Stretch"  VerticalAlignment="Stretch" >
 
             <controls:DockPanel  LastChildFill="True" >
-            <ScrollViewer ZoomMode="Enabled"  HorizontalScrollMode="Enabled" HorizontalAlignment="Stretch"  VerticalAlignment="Stretch" Name="scroller" Background="Red" HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Visible">
+            <ScrollViewer  ZoomMode="Enabled"  HorizontalScrollMode="Enabled" HorizontalAlignment="Stretch"  VerticalAlignment="Stretch" Name="scroller" Background="Red" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden">
 
                 <Canvas Background="#EFEFEF" MinHeight="300" MinWidth="300"    x:Name="editorCanvas" ></Canvas>
         </ScrollViewer>

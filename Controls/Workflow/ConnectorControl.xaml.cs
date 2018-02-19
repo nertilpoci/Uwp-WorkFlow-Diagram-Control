@@ -40,9 +40,18 @@ namespace WorkFlow.Controls.Workflow
         public Point Point { get; set; }
         public FrameworkElement Element { get => this; }
 
+        public ILine AddLine(ILine line,ConnectorType type)
+        {
+            Lines.Add(line);
+            if (type == ConnectorType.In) line.End = this;
+            else if (type == ConnectorType.Out) line.Start = this;
+            return line;
+            
+        }
+
         public bool CanConnect(ILine line)
         {
-         return   this.Type == ConnectorType.In;
+            return line!=null && this.Type == ConnectorType.In && line.Start.WorkFlowItem != this.WorkFlowItem;
         }
 
         public void MouseIn()

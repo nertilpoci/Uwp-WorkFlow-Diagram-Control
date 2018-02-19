@@ -12,7 +12,7 @@
     <DefaultLanguage>en-US</DefaultLanguage>
     <TargetPlatformIdentifier>UAP</TargetPlatformIdentifier>
     <TargetPlatformVersion Condition=" '$(TargetPlatformVersion)' == '' ">10.0.16299.0</TargetPlatformVersion>
-    <TargetPlatformMinVersion>10.0.10586.0</TargetPlatformMinVersion>
+    <TargetPlatformMinVersion>10.0.16299.0</TargetPlatformMinVersion>
     <MinimumVisualStudioVersion>14</MinimumVisualStudioVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{A5A43C5B-DE2A-4C0C-9213-0A381AF9435A};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -105,19 +105,21 @@
     <Compile Include="Controls\Workflow\WorkFlowItem.xaml.cs">
       <DependentUpon>WorkFlowItem.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Enums\ItemRotation.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="GestureRecognizer.cs" />
+    <Compile Include="Interface\IWorkFlowEditor.cs" />
     <Compile Include="Interface\WorkFlowitem.cs" />
     <Compile Include="MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Models\WorkFlowLoopEventModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest">
       <SubType>Designer</SubType>
     </AppxManifest>
-    <None Include="WorkFlow_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Properties\Default.rd.xml" />
@@ -160,6 +162,12 @@
     </PackageReference>
     <PackageReference Include="Microsoft.Toolkit.Uwp.UI.Controls">
       <Version>2.1.1</Version>
+    </PackageReference>
+    <PackageReference Include="MvvmLight">
+      <Version>5.4.1</Version>
+    </PackageReference>
+    <PackageReference Include="MvvmLightLibs">
+      <Version>5.4.1</Version>
     </PackageReference>
   </ItemGroup>
   <ItemGroup />

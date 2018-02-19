@@ -11,6 +11,7 @@ using Windows.System;
 using Windows.UI;
 using Windows.UI.Core;
 using Windows.UI.Input;
+using Windows.UI.Popups;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -21,12 +22,13 @@ using Windows.UI.Xaml.Navigation;
 using Windows.UI.Xaml.Shapes;
 using WorkFlow.Extensions;
 using WorkFlow.Interface;
+using WorkFlow.Models;
 
 // The User Control item template is documented at https://go.microsoft.com/fwlink/?LinkId=234236
 
 namespace WorkFlow.Controls.Workflow
 {
-    public sealed partial class WorkFlowEditor : UserControl
+    public sealed partial class WorkFlowEditor : UserControl,IWorkFlowEditor
     {
         int ItemHeight = 100;
         int ItemWidth = 200;
@@ -39,6 +41,11 @@ namespace WorkFlow.Controls.Workflow
             SetScrollViewerEvents();
             SetCanvasEvents();
             AddTestControls();
+            LoopDetected += async (s, e) =>{
+
+                var dialog = new MessageDialog("This Connection creates a loop, loops are not allowed");
+                await dialog.ShowAsync();
+            };
         }
         private void AddTestControls()
         {
@@ -88,9 +95,9 @@ namespace WorkFlow.Controls.Workflow
         }
         private void SetCanvasEvents()
         {
-            editorCanvas.IsRightTapEnabled = true;
-            editorCanvas.RightTapped += (s, e) => {
-               var position= e.GetPosition(editorCanvas);
+               editorCanvas.IsRightTapEnabled = true;
+               editorCanvas.RightTapped += (s, e) => {
+                var position= e.GetPosition(editorCanvas);
                 var item = CreateNew();
                 Canvas.SetLeft(item.Element, position.X);
                 Canvas.SetTop(item.Element, position.Y);
@@ -101,22 +108,49 @@ namespace WorkFlow.Controls.Workflow
 
             editorCanvas.PointerReleased += (s, e) =>
             {
-                if (MovingLine == null) return;
-                this.editorCanvas.Children.Remove(MovingLine.Element);
-                MovingLine = null;
+                ConnectionCreateCleanup();
             };
 
             editorCanvas.PointerMoved += (s, e) => {
                 if (MovingLine == null) return;
-                DrawPath(MovingLine.Start.Point, e.GetCurrentPoint(editorCanvas).Position, (Line)MovingLine);
+                MovingLine.DrawPath(MovingLine.Start.Point, e.GetCurrentPoint(editorCanvas).Position);
             };
 
         }
+        private void ConnectionCreateCleanup()
+        {
+            if (MovingLine == null) return;
+            this.editorCanvas.Children.Remove(MovingLine.Element);
+            MovingLine.Start.Lines.Remove(MovingLine);
+            MovingLine = null;
+            SetResetConnectorCanConnect(null, WorkFlowItems);
+        }
         ILine MovingLine;
+
+        public event EventHandler<WorkFlowLoopEventModel> LoopDetected;
+
+        public bool AllowLoops { get; set; }
+
+        private  void OnLoopDetected(WorkFlowLoopEventModel e)
+        {
+            LoopDetected?.Invoke(this, e);
+        }
+        private void SetResetConnectorCanConnect(ILine line,IList<IWorkFlowItem> items)
+        {
+            foreach (var wE in items)
+            {
+                foreach (var c in wE.Connectors)
+                {
+                    c.SetCanConnectUi(c.CanConnect(MovingLine) == false);
+                }
+            }
+        }
         private IWorkFlowItem CreateNew()
         {
             IWorkFlowItem item = new WorkFlowItem(editorCanvas);
             item.Element.RenderTransform = new TranslateTransform();
+            item.Title = "Sample Title";
+            item.Description = "Sample Description for the node";
             item.ConstructControl();
 
             foreach (var connector in item.Connectors)
@@ -138,23 +172,12 @@ namespace WorkFlow.Controls.Workflow
                         MovingLine = ControlHelper.CreateLine(connector, null);
                         connector.Lines.Add(MovingLine);
                         editorCanvas.Children.Add(MovingLine.Element);
-                        foreach (var wE in WorkFlowItems)
-                        {
-                            foreach (var c in wE.Connectors)
-                            {
-                                c.SetCanConnectUi(c.CanConnect(MovingLine) == false);
-                            }
-                        }
+                        SetResetConnectorCanConnect(MovingLine,WorkFlowItems);
                     };
 
                     connector.Element.PointerReleased += (s, e) =>
                     {
-
-                        if (MovingLine == null) return;
-                        this.editorCanvas.Children.Remove(MovingLine.Element);
-                        MovingLine.Start.Lines.Remove(MovingLine);
-                        MovingLine = null;
-
+                        ConnectionCreateCleanup();
                     };
                 }
                 else
@@ -164,13 +187,23 @@ namespace WorkFlow.Controls.Workflow
 
                         if (MovingLine != null)
                         {
-
                             e.Handled = true;
+
+                            if (IsLoop(MovingLine.Start,connector))
+                            {
+                                OnLoopDetected(new WorkFlowLoopEventModel(MovingLine.Start, connector));
+
+                                if (!AllowLoops)
+                                {
+                                    ConnectionCreateCleanup();
+                                    return;
+                                }
+                              
+                            }
 
                             connector.Point = e.GetCurrentPoint(editorCanvas).Position;
                             MovingLine.End = connector;
-
-                            DrawPath(MovingLine.Start.Point, MovingLine.End.Point, (Line)MovingLine.Element);
+                            MovingLine.DrawPath(MovingLine.Start.Point, MovingLine.End.Point);
                             connector.Lines.Add(MovingLine);
 
                             MovingLine = new Line();
@@ -193,6 +226,7 @@ namespace WorkFlow.Controls.Workflow
                 e.Handled = true;
                 var sender = s as FrameworkElement;
                 sender.ReleasePointerCapture(e.Pointer);
+                ConnectionCreateCleanup();
             };
 
             item.Element.PointerMoved += (s, e) =>
@@ -230,7 +264,7 @@ namespace WorkFlow.Controls.Workflow
 
 
 
-                    MoveWorkFlowItem(item, point);
+                    item.Move(point);
                     MakeCanvasFit((int)this.ActualWidth, (int)this.ActualHeight);
                 }
             };
@@ -247,35 +281,7 @@ namespace WorkFlow.Controls.Workflow
             if(maxX+xPadding>minX) editorCanvas.Width = maxX + xPadding;
             if(maxY+yPadding>minY) editorCanvas.Height = maxY + yPadding;
         }
-        private void MoveWorkFlowItem(IWorkFlowItem item, Point point)
-        {
-            Canvas.SetLeft(item.Element, point.X - item.Element.ActualWidth / 2);
-            Canvas.SetTop(item.Element, point.Y - item.Element.ActualHeight / 2);
-
-            foreach (var connector in item.Connectors.Where(z => z.Lines.Any()))
-            {
-                foreach (var line in connector.Lines)
-                {
-                    var path = line as Line;
-                    var ui = connector as UserControl;
-                    var transform = ui.TransformToVisual(editorCanvas);
-                    Point absolutePosition = transform.TransformPoint(new Point(0, 0));
-                    absolutePosition.X += ui.ActualWidth / 2;
-                    absolutePosition.Y += ui.ActualHeight / 2;
-                    if (connector.Type == Interface.ConnectorType.In)
-                    {
-                        line.End.Point = absolutePosition;
-                        DrawPath(line.Start.Point, line.End.Point, path);
-                    }
-                    else
-                    {
-                        line.Start.Point = absolutePosition;
-                        DrawPath(line.Start.Point, line.End.Point, path);
-                    }
-
-                }
-            }
-        }
+      
         private void DrawPath(Point source, Point destination, Line path)
         {
             float magic = 8;
@@ -311,6 +317,18 @@ namespace WorkFlow.Controls.Workflow
             geo.Figures.Add(pf);
             path.Data = geo;
             Canvas.SetZIndex(path, -2);
+        }
+        private bool IsLoop(IConnector start, IConnector end)
+        {
+            foreach (var item in end.WorkFlowItem.Connectors.Where(z=>z.Type==ConnectorType.Out))
+            {
+                foreach (var line in item.Lines)
+                {
+                    if (line.End.WorkFlowItem == start.WorkFlowItem) return true;
+                    return IsLoop(start, line.End);
+                }
+            }
+            return false;
         }
 
     }

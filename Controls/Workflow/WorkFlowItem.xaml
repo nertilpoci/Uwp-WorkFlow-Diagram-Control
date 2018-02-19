@@ -3,37 +3,66 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:WorkFlow.Controls.Workflow"
+    xmlns:enums="using:WorkFlow.Enums"
     xmlns:controls="using:WorkFlow.Controls.Workflow"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+         xmlns:winControls="using:Microsoft.Toolkit.Uwp.UI.Controls"
+
     mc:Ignorable="d" 
    Width="200" Height="100">
 
-    <Grid  Name="main">
+        <Grid  Name="main">
+
+
+            <!--<Grid.ContextFlyout>
+                <MenuFlyout>
+                    <MenuFlyoutSubItem Text="Rotation">
+
+                        <MenuFlyoutItem Text="Right - Left" Command="{Binding ChangeConnectorLayoutCommand}" CommandParameter="{ x:Bind enums:InputOutputConnectorPosition.RightLeft}" />
+                        <MenuFlyoutItem Text="Left - Right" Command="{Binding ChangeConnectorLayoutCommand}" CommandParameter="{ x:Bind enums:InputOutputConnectorPosition.LeftRight}" />
+                        <MenuFlyoutItem Text="Top - Bottom" Command="{Binding ChangeConnectorLayoutCommand}" CommandParameter="{ x:Bind enums:InputOutputConnectorPosition.TopBottom}" />
+
+                        <MenuFlyoutItem Text="Bottom - Top" Command="{Binding ChangeConnectorLayoutCommand}" CommandParameter="{ x:Bind enums:InputOutputConnectorPosition.BottomTop}" />
 
 
 
+                    </MenuFlyoutSubItem>
+                </MenuFlyout>
+            </Grid.ContextFlyout>-->
 
-        <Grid  BorderBrush="Gray"  HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+            <winControls:DockPanel  LastChildFill="True" >
 
-            <StackPanel  HorizontalAlignment="Left"   Width="20"    
-                 VerticalAlignment="Center" x:Name="inputConnectors">
+                <StackPanel    winControls:DockPanel.Dock="Left" HorizontalAlignment="Center"
+                 VerticalAlignment="Center" x:Name="inputConnectors"  Background="Transparent" >
+                    <!--<controls:ConnectorControl Width="20" Background="Blue" Height="20"></controls:ConnectorControl>-->
 
-            </StackPanel>
-            <StackPanel   HorizontalAlignment="Right"   Width="20"  x:Name="outputConnectors"
+                </StackPanel>
+                <StackPanel winControls:DockPanel.Dock="Right"  HorizontalAlignment="Center"     x:Name="outputConnectors"
                  VerticalAlignment="Center" >
-                <!--<controls:ConnectorControl Width="20" Height="20" Background="Green"></controls:ConnectorControl>-->
-            </StackPanel>
-            <Grid Margin="10,0,10,0"    x:Name="itemInfo" HorizontalAlignment="Stretch"  VerticalAlignment="Stretch" Background="#6E9ECF" >
-                <StackPanel VerticalAlignment="Center">
-                    <TextBlock Text="{Binding Title}" HorizontalAlignment="Center" FontSize="9" Foreground="#FF333333" />
-                    <TextBlock x:Name="SummaryTextBlock" Text="{Binding Description}" HorizontalAlignment="Center" FontSize="7"
+                </StackPanel>
+            <Border CornerRadius="20"  Margin="-10,0,-10,0"    x:Name="itemInfo" HorizontalAlignment="Stretch"  VerticalAlignment="Stretch" Background="#6E9ECF" >
+                <winControls:DropShadowPanel Color="Black"
+                          OffsetX="-50"
+                          OffsetY="-50"
+                          BlurRadius="50"
+                          ShadowOpacity=".7"
+                          
+                          HorizontalContentAlignment="Stretch"
+                          VerticalContentAlignment="Stretch">
+                    <Grid>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="{Binding Title, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Center" FontSize="15" Foreground="White" />
+                            <TextBlock  Text="{Binding Description, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Center" FontSize="10"
                                Foreground="#FF777777"
                                TextWrapping="Wrap" TextAlignment="Center" />
-                </StackPanel>
-            </Grid>
+                        </StackPanel>
+                    </Grid>
+                </winControls:DropShadowPanel>
+               
+            </Border>
 
-          
+
+        </winControls:DockPanel>
         </Grid>
-    </Grid>
 </UserControl>

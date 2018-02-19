@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.UI.Xaml;
+using WorkFlow.Enums;
 
 namespace WorkFlow.Interface
 {
@@ -16,6 +17,10 @@ namespace WorkFlow.Interface
      
      Point Position { get; set; }
      void ConstructControl();
+     IConnector AddConnector(IConnector connector);
+     InputOutputConnectorPosition ConnectorLayout { get; set; }
+        void ChangeOrientation(InputOutputConnectorPosition layout);
+        void Move(Point point);
     }
     public interface IUIElement
     {
@@ -34,14 +39,17 @@ namespace WorkFlow.Interface
         IList<ILine> Lines { get; set; }
         IWorkFlowItem WorkFlowItem { get; set; }
         Point Point { get; set; }
+        ILine AddLine(ILine line,ConnectorType type);
     }
     public interface ILine: IUIElement
     {
+        
         string Label { get; set; }
         Action MouseIn { get; set; }
         Action MouseOut { get; set; }
         IConnector Start { get; set; } 
         IConnector End { get; set; }
+        void DrawPath(Point source, Point destination, float magic = 8);
     }
     public enum ConnectorType
     {
