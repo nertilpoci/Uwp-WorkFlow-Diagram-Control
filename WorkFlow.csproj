@@ -109,6 +109,7 @@
     <Compile Include="Enums\NodeType.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="GestureRecognizer.cs" />
+    <Compile Include="Impl\BaseWorkFlowElement.cs" />
     <Compile Include="Interface\IWorkFlowEditor.cs" />
     <Compile Include="Interface\WorkFlowitem.cs" />
     <Compile Include="MainPage.xaml.cs">

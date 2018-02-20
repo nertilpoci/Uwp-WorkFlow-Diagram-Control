@@ -22,17 +22,20 @@ using WorkFlow.Interface;
 using GalaSoft.MvvmLight;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
+using WorkFlow.Impl;
 
 // The User Control item template is documented at https://go.microsoft.com/fwlink/?LinkId=234236
 
 namespace WorkFlow.Controls.Workflow
 {
-    public sealed partial class WorkFlowItem : UserControl, IWorkFlowItem, INotifyPropertyChanged
+    public sealed partial class WorkFlowItem : ExecutableNodeBase, IWorkFlowItem, INotifyPropertyChanged, IExecutableNode
     {
-        UIElement parent;
-        public WorkFlowItem(UIElement parent)
+        FrameworkElement parent;
+        public WorkFlowItem(FrameworkElement parent):base(parent)
         {
             this.InitializeComponent();
+            base.Element = this;
             this.DataContext = this;
             this.parent = parent;
             this.RightTapped += WorkFlowItem_RightTapped;
@@ -49,60 +52,14 @@ namespace WorkFlow.Controls.Workflow
             //Move(GetPosition());
         }
 
-        public IList<IConnector> Connectors { get; set; } = new List<IConnector>();
-        private string _title;
-        public string Title { get { return _title; } set { _title = value; OnPropertyChanged(); } }
-        private string _description;
-        public string Description { get { return _description; } set { _description = value; OnPropertyChanged(); } }
 
-        public FrameworkElement Element => this;
-        private float magic = 8;
         public void Move( Point point)
         {
-            Canvas.SetLeft(this, point.X - this.ActualWidth / 2);
-            Canvas.SetTop(this.Element, point.Y - this.ActualHeight / 2);
-
-            foreach (var connector in this.Connectors.Where(z => z.Lines.Any()))
-            {
-                foreach (var line in connector.Lines)
-                {
-                    var path = line as Line;
-                    var ui = connector as UserControl;
-                    var transform = ui.TransformToVisual(parent);
-                    Point absolutePosition = transform.TransformPoint(new Point(0, 0));
-                    absolutePosition.X += ui.ActualWidth / 2;
-                    absolutePosition.Y += ui.ActualHeight / 2;
-                    if (connector.Type == Interface.ConnectorType.In)
-                    {
-                        line.End.Point = absolutePosition;
-                        path.DrawPath(line.Start.Point, line.End.Point, this.magic);
-                    }
-                    else
-                    {
-                        line.Start.Point = absolutePosition;
-                        path.DrawPath(line.Start.Point, line.End.Point,this.magic);
-                    }
-
-                }
-            }
+            base.Move(point, this.ActualWidth, this.ActualHeight);
         }
-        private Point _position;
+      
 
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        public void OnPropertyChanged([CallerMemberName] string propertyName = null)
-        {
-            // Raise the PropertyChanged event, passing the name of the property whose value has changed.
-            this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
-        public Point Position { get { return GetPosition(); } set { _position = value; } }
-
-        public InputOutputConnectorPosition ConnectorLayout { get; set; } = InputOutputConnectorPosition.RightLeft;
-
-        private Point GetPosition()
-        {
-            return Element.TransformToVisual(parent).TransformPoint(new Point(0, 0)); ;
-        }
+      
 
         public void ConstructControl(IConnector[] connectors)
         {
@@ -156,7 +113,6 @@ namespace WorkFlow.Controls.Workflow
                     break;
                 case InputOutputConnectorPosition.RightLeft:
                     ChangeInputLayout(Orientation.Vertical, Dock.Left, Dock.Right);
-                    this.magic = -8;
 
                     break;
                 case InputOutputConnectorPosition.BottomTop:
@@ -171,6 +127,11 @@ namespace WorkFlow.Controls.Workflow
         private void SymbolIcon_Tapped(object sender, TappedRoutedEventArgs e)
         {
 
+        }
+
+        public void Run(params object[] args)
+        {
+            Run(Connectors, args);
         }
     }
 }

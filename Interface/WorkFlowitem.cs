@@ -14,13 +14,24 @@ namespace WorkFlow.Interface
      IList<IConnector> Connectors { get; set; }
      string Title { get; set; }
      string Description { get; set; }
-     
      Point Position { get; set; }
      void ConstructControl(IConnector[] connectors);
      IConnector AddConnector(IConnector connector);
      InputOutputConnectorPosition ConnectorLayout { get; set; }
-        void ChangeOrientation(InputOutputConnectorPosition layout);
-        void Move(Point point);
+     void ChangeOrientation(InputOutputConnectorPosition layout);
+     void Move(Point point);
+    }
+
+    public interface IExecutableNode
+    {
+     bool IsExecuting { get; set; }
+     Func<object[],object> OnExecuteAction { get; set; }
+     void Run(params object[] args);
+    }
+
+    public interface ITriggerNode
+    {
+        void Start(params object[] args);
     }
     public interface IUIElement
     {
@@ -31,10 +42,8 @@ namespace WorkFlow.Interface
         ConnectorType Type { get; set; }
         string Label { get; set; }
         void MouseIn();
-        void MouseOut();
-        
-        void SetCanConnectUi(bool reset = false);
-        
+        void MouseOut();      
+        void SetCanConnectUi(bool reset = false);     
         bool CanConnect(ILine line);
         IList<ILine> Lines { get; set; }
         IWorkFlowItem WorkFlowItem { get; set; }
