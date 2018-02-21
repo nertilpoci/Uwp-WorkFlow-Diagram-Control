@@ -92,11 +92,12 @@ namespace WorkFlow.Impl
         private bool _isExecuting;
         public bool IsExecuting { get { return _isExecuting; } set { _isExecuting = value; OnPropertyChanged(); } }
         public Func<object[], object> OnExecuteAction { get; set; }
-        public async Task Run(IConnector[] connectors, params object[] args)
+        public async  void Run(IConnector[] connectors, params object[] args)
         {
             _connectors = connectors;
-            IsExecuting = true;
-            await Task.Run(() => CallNextItem(OnExecuteAction(args)));
+
+            await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () => { IsExecuting = true; });
+            Task.Run(() => CallNextItem(OnExecuteAction(args)));
         }
        
         private void CallNextItem(object input)

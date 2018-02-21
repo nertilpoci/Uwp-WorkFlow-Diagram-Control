@@ -126,7 +126,7 @@ namespace WorkFlow.Controls.Workflow
 
         }
 
-        public void Run(params object[] args)
+        public  void Run(params object[] args)
         {
             base.Run(Connectors.ToArray(), args);
         }
