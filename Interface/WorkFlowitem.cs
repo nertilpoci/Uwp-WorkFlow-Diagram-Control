@@ -12,10 +12,8 @@ namespace WorkFlow.Interface
    public interface IWorkFlowItem:IUIElement
     {
      IList<IConnector> Connectors { get; set; }
-     string Title { get; set; }
-     string Description { get; set; }
+      IWorkFlowItemContent ItemContent { get; set; }
      Point Position { get; set; }
-     void ConstructControl(IConnector[] connectors);
      IConnector AddConnector(IConnector connector);
      InputOutputConnectorPosition ConnectorLayout { get; set; }
      void ChangeOrientation(InputOutputConnectorPosition layout);

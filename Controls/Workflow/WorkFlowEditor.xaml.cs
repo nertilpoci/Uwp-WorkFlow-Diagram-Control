@@ -58,21 +58,21 @@ namespace WorkFlow.Controls.Workflow
             switch (nodeType)
             {
                 case NodeType.Trigger:
-                    var trigger=  CreateNewNode(new IConnector[] {  new ConnectorControl { Type = ConnectorType.Out, Label = "Output", Height = 25, Width = 25 } }, "Sample Trigger", "Test trigger node");
+                    var trigger=  CreateNewNode(typeof(TriggerWorkflowItem), "Sample Trigger", "Test trigger node");
                     WorkFlowItems.Add(trigger);
                     editorCanvas.Children.Add(trigger.Element);
                     Canvas.SetLeft(trigger.Element, _canvasLastRightTappedPoint.X);
                     Canvas.SetTop(trigger.Element, _canvasLastRightTappedPoint.Y);
                     break;
                 case NodeType.Action:
-                    var action = CreateNewNode(new IConnector[] { new ConnectorControl { Type = ConnectorType.In, Label = "In", Height = 25, Width = 25 }, new ConnectorControl { Type = ConnectorType.Out, Label = "Output", Height = 25, Width = 25 } }, "Sample Action", "Test action node");
+                    var action = CreateNewNode(typeof(ActionWorkFlowItem), "Sample Action", "Test trigger node");
                     WorkFlowItems.Add(action);
                     editorCanvas.Children.Add(action.Element);
                     Canvas.SetLeft(action.Element, _canvasLastRightTappedPoint.X);
                     Canvas.SetTop(action.Element, _canvasLastRightTappedPoint.Y);
                     break;
                 case NodeType.Result:
-                    var result = CreateNewNode(new IConnector[] { new ConnectorControl { Type = ConnectorType.In, Label = "In", Height = 25, Width = 25 }, }, "Sample Result", "Test result node");
+                    var result = CreateNewNode(typeof(TriggerWorkflowItem), "Sample Trigger", "Test trigger node");
                     WorkFlowItems.Add(result);
                     editorCanvas.Children.Add(result.Element);
                     Canvas.SetLeft(result.Element, _canvasLastRightTappedPoint.X);
@@ -168,13 +168,12 @@ namespace WorkFlow.Controls.Workflow
                 }
             }
         }
-        private IWorkFlowItem CreateNewNode(IConnector[] connectors, string title, string description)
+        private IWorkFlowItem CreateNewNode(Type type, string title, string description)
         {
-            IWorkFlowItem item = new WorkFlowItem(editorCanvas);
+            IWorkFlowItem item = (IWorkFlowItem)Activator.CreateInstance(type, editorCanvas);
             item.Element.RenderTransform = new TranslateTransform();
-            item.Title =title;
-            item.Description = description;
-            item.ConstructControl(connectors);
+            item.ItemContent.Title =title;
+            item.ItemContent.Description = description;
 
             foreach (var connector in item.Connectors)
             {

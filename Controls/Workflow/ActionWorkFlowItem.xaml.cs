@@ -24,16 +24,16 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using WorkFlow.Impl;
-using WorkFlow.ViewModels;
+using System.Diagnostics;
 
 // The User Control item template is documented at https://go.microsoft.com/fwlink/?LinkId=234236
 
 namespace WorkFlow.Controls.Workflow
 {
-    public sealed partial class WorkFlowItem : ExecutableNodeBase, IWorkFlowItem, INotifyPropertyChanged, IExecutableNode
+    public sealed partial class ActionWorkFlowItem : ExecutableNodeBase, IWorkFlowItem, INotifyPropertyChanged, IExecutableNode
     {
         FrameworkElement parent;
-        public WorkFlowItem(FrameworkElement parent):base(parent)
+        public ActionWorkFlowItem(FrameworkElement parent):base(parent)
         {
             this.InitializeComponent();
             base.Element = this;
@@ -41,11 +41,16 @@ namespace WorkFlow.Controls.Workflow
             this.parent = parent;
             this.RightTapped += WorkFlowItem_RightTapped;
             ChangeConnectorLayoutCommand = new RelayCommand<InputOutputConnectorPosition>(ChangeOrientation);
+            var inconnector = new ConnectorControl { Type = ConnectorType.In, Label = "Input", Height = 25, Width = 25 };
+            var outconnector = new ConnectorControl { Type = ConnectorType.Out, Label = "Output", Height = 25, Width = 25 };
+            AddConnector(inconnector);
 
+            AddConnector(outconnector);
+            OnExecuteAction = input => {
+                Debug.WriteLine(input[0]); return "test"; };
         }
 
         public ICommand ChangeConnectorLayoutCommand { get; set; }
-      
 
         private void WorkFlowItem_RightTapped(object sender, RightTappedRoutedEventArgs e)
         {
@@ -64,25 +69,16 @@ namespace WorkFlow.Controls.Workflow
 
       
 
-        public void ConstructControl(IConnector[] connectors)
-        {
-
-            foreach (var connector in connectors)
-            {
-            AddConnector(connector);
-                if (connector.Type == ConnectorType.In) inputConnectors.Children.Add(connector.Element);
-                else if (connector.Type == ConnectorType.Out) outputConnectors.Children.Add(connector.Element);
-            }
-           
-
-            
-        }
+      
 
         public IConnector AddConnector(IConnector connector)
         {
                 Connectors.Add(connector);
                 connector.WorkFlowItem = this;
-                return connector;
+            if(connector.Type==ConnectorType.In) inputConnectors.Children.Add(connector.Element);
+            else outputConnectors.Children.Add(connector.Element);
+
+            return connector;
         }
 
    
@@ -134,7 +130,14 @@ namespace WorkFlow.Controls.Workflow
 
         public void Run(params object[] args)
         {
-            Run(Connectors, args);
+            base.Run(Connectors.ToArray(), args);
+        }
+
+       
+
+        private void StartMenuItemClick(object sender, RoutedEventArgs e)
+        {
+           
         }
     }
 }

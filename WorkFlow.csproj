@@ -99,17 +99,27 @@
       <DependentUpon>ConnectorControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\Workflow\Line.cs" />
+    <Compile Include="Controls\Workflow\ActionWorkFlowItem.xaml.cs">
+      <DependentUpon>ActionWorkFlowItem.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\Workflow\WorkFlowEditor.xaml.cs">
       <DependentUpon>WorkFlowEditor.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\Workflow\TriggerWorkflowItem.xaml.cs">
+      <DependentUpon>TriggerWorkflowItem.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\Workflow\WorkFlowItem.xaml.cs">
       <DependentUpon>WorkFlowItem.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\Workflow\WorkFlowItemContent.xaml.cs">
+      <DependentUpon>WorkFlowItemContent.xaml</DependentUpon>
     </Compile>
     <Compile Include="Enums\InputOutputConnectorPosition.cs" />
     <Compile Include="Enums\NodeType.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="GestureRecognizer.cs" />
     <Compile Include="Impl\BaseWorkFlowElement.cs" />
+    <Compile Include="Interface\IWorkCodeContent.cs" />
     <Compile Include="Interface\IWorkFlowEditor.cs" />
     <Compile Include="Interface\WorkFlowitem.cs" />
     <Compile Include="MainPage.xaml.cs">
@@ -117,6 +127,7 @@
     </Compile>
     <Compile Include="Models\WorkFlowLoopEventModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ViewModels\WorkFlowItemViewModel.cs" />
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest">
@@ -142,11 +153,23 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Controls\Workflow\ActionWorkFlowItem.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Controls\Workflow\WorkFlowEditor.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Controls\Workflow\TriggerWorkflowItem.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Controls\Workflow\WorkFlowItem.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\Workflow\WorkFlowItemContent.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

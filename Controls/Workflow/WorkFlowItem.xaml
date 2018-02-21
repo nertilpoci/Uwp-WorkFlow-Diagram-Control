@@ -43,33 +43,7 @@
                  VerticalAlignment="Center" >
                 </StackPanel>
                 <Border CornerRadius="20"  Margin="-10,0,-10,0"    x:Name="itemInfo" HorizontalAlignment="Stretch"  VerticalAlignment="Stretch" Background="#6E9ECF" >
-                <winControls:DropShadowPanel Color="Black"
-                          OffsetX="-10"
-                          OffsetY="-10"
-                          BlurRadius="30"
-                          ShadowOpacity=".5"
-                          
-                          HorizontalContentAlignment="Stretch"
-                          VerticalContentAlignment="Stretch">
-                    <Grid>
-                        <StackPanel VerticalAlignment="Center">
-                            <TextBlock Text="{Binding Title, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Center" FontSize="15" Foreground="White" />
-                            <TextBlock  Text="{Binding Description, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Center" FontSize="10"
-                               Foreground="#FF777777"
-                               TextWrapping="Wrap" TextAlignment="Center" />
-                        </StackPanel>
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Bottom">
-                            <Button Margin="3,0,3,0"  BorderThickness="0" BorderBrush="Transparent" Background="Transparent" >
-                                <FontIcon FontSize="12" Foreground="DarkRed" FontFamily="Segoe MDL2 Assets" Glyph="&#xE74D;"/>
-                            </Button>
-                            <Button Margin="3,0,3,0" BorderThickness="0" BorderBrush="Transparent" Background="Transparent"  >
-                                <FontIcon FontSize="12"  Foreground="White" FontFamily="Segoe MDL2 Assets" Glyph="&#xE70F;"/>
-                            </Button>
-
-                        </StackPanel>
-                    </Grid>
-                    
-                </winControls:DropShadowPanel>
+                <local:WorkFlowItemContent DataContext="{Binding ItemContent}"></local:WorkFlowItemContent>
                
             </Border>
                 

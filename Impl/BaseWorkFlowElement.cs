@@ -23,6 +23,7 @@ using GalaSoft.MvvmLight.Command;
 using System.Collections.Generic;
 using WorkFlow.Controls.Workflow;
 using System;
+using WorkFlow.ViewModels;
 
 namespace WorkFlow.Impl
 {
@@ -32,13 +33,11 @@ namespace WorkFlow.Impl
         public BaseWorkFlowElement(FrameworkElement parent)
         {
             this.parent = parent;
+            ItemContent = new WorkFlowItemViewModel();
         }
         public IList<IConnector> Connectors { get; set; } = new List<IConnector>();
-        private string _title;
-        public string Title { get { return _title; } set { _title = value; OnPropertyChanged(); } }
-        private string _description;
-        public string Description { get { return _description; } set { _description = value; OnPropertyChanged(); } }
         public FrameworkElement Element { get; set; }
+        public IWorkFlowItemContent ItemContent { get; set; }
         private float magic = 8;
         public void Move(Point point,double width, double height)
         {
@@ -93,18 +92,13 @@ namespace WorkFlow.Impl
         private bool _isExecuting;
         public bool IsExecuting { get { return _isExecuting; } set { _isExecuting = value; OnPropertyChanged(); } }
         public Func<object[], object> OnExecuteAction { get; set; }
-        public void Run(IConnector[] connectors, params object[] args)
+        public async Task Run(IConnector[] connectors, params object[] args)
         {
             _connectors = connectors;
             IsExecuting = true;
-            OnExecuteAction.BeginInvoke(args, new AsyncCallback(RunCompleted), null);
+            await Task.Run(() => CallNextItem(OnExecuteAction(args)));
         }
-        private void RunCompleted(IAsyncResult ar)
-        {
-            IsExecuting = false;
-            var data = OnExecuteAction.EndInvoke(ar);
-            Task.Run(() => CallNextItem(data));
-        }
+       
         private void CallNextItem(object input)
         {
             _connectors.Where(z => z.Type == ConnectorType.Out).ToList().ForEach(connector => {
@@ -114,4 +108,7 @@ namespace WorkFlow.Impl
             });
         }
     }
+
+    
+
 }
