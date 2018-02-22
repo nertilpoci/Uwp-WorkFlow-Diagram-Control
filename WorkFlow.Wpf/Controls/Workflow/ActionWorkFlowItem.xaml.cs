@@ -5,12 +5,14 @@ using Workflow.Common.Enums;
 using System.Windows;
 using WorkFlow.Wpf.Impl;
 using WorkFlow.Controls.Workflow;
+using Workflow.Common.Models;
+using Workflow.Common.Extensions;
 
 // The User Control item template is documented at https://go.microsoft.com/fwlink/?LinkId=234236
 
 namespace WorkFlow.Wpf.Controls.Workflow 
 {
-    public sealed partial class ActionWorkFlowItem : ExecutableNodeBase, IWorkFlowItem, INotifyPropertyChanged, IExecutableNode
+    public sealed partial class ActionWorkFlowItem : ExecutableNodeBase
     {
         FrameworkElement parent;
         public ActionWorkFlowItem(FrameworkElement parent):base(parent)
@@ -19,7 +21,7 @@ namespace WorkFlow.Wpf.Controls.Workflow
             base.Element = this;
             this.DataContext = this;
             this.parent = parent;
-            AddConnector(new ConnectorControl { Type = ConnectorType.In, Label = "Input", Height = 25, Width = 25, WorkFlowItem = this });
+            this.AddConnector(new ConnectorControl { Type = ConnectorType.In, Label = "Input", Height = 25, Width = 25, WorkFlowItem = this });
             AddConnector(new ConnectorControl { Type = ConnectorType.Out, Label = "Output", Height = 25, Width = 25, WorkFlowItem = this });
             OnExecuteAction = async input => {
                 await Task.Delay(5000);

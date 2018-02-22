@@ -10,7 +10,7 @@ using WorkFlow.Controls.Workflow;
 
 namespace WorkFlow.Wpf.Controls.Workflow 
 {
-    public sealed partial class TriggerWorkFlowItem : ExecutableNodeBase, IWorkFlowItem, INotifyPropertyChanged, IExecutableNode,ITriggerNode
+    public sealed partial class TriggerWorkFlowItem : ExecutableNodeBase,ITriggerNode
     {
         FrameworkElement parent;
         public TriggerWorkFlowItem(FrameworkElement parent):base(parent)

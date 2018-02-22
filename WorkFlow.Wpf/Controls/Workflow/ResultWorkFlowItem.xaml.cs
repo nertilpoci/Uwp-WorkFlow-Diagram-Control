@@ -10,7 +10,7 @@ using WorkFlow.Controls.Workflow;
 
 namespace WorkFlow.Wpf.Controls.Workflow 
 {
-    public sealed partial class ResultWorkFlowItem : ExecutableNodeBase, IWorkFlowItem, INotifyPropertyChanged, IExecutableNode
+    public sealed partial class ResultWorkFlowItem : ExecutableNodeBase
     {
         FrameworkElement parent;
         public ResultWorkFlowItem(FrameworkElement parent):base(parent)
@@ -27,9 +27,6 @@ namespace WorkFlow.Wpf.Controls.Workflow
             };
         }
 
-        public async Task Start(params object[] args)
-        {
-            await Run("Sample");
-        }
+      
     }
 }
