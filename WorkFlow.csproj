@@ -95,28 +95,42 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\Shared\ExecutingIndicator.xaml.cs">
+      <DependentUpon>ExecutingIndicator.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\Workflow\ConnectorControl.xaml.cs">
       <DependentUpon>ConnectorControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\Workflow\Line.cs" />
+    <Compile Include="Controls\Workflow\ActionWorkFlowItem.xaml.cs">
+      <DependentUpon>ActionWorkFlowItem.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\Workflow\ResultWorkFlowItem.xaml.cs">
+      <DependentUpon>ResultWorkFlowItem.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\Workflow\WorkFlowEditor.xaml.cs">
       <DependentUpon>WorkFlowEditor.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\Workflow\TriggerWorkflowItem.xaml.cs">
+      <DependentUpon>TriggerWorkflowItem.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\Workflow\WorkFlowItem.xaml.cs">
       <DependentUpon>WorkFlowItem.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Enums\InputOutputConnectorPosition.cs" />
-    <Compile Include="Enums\NodeType.cs" />
+    <Compile Include="Controls\Workflow\WorkFlowItemContentBase.xaml.cs">
+      <DependentUpon>WorkFlowItemContentBase.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Converters\BoolToVisibilityConverter.cs" />
+    <Compile Include="Extensions\UiExtensions.cs" />
+    <Compile Include="Extensions\Positioning.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="GestureRecognizer.cs" />
     <Compile Include="Impl\BaseWorkFlowElement.cs" />
-    <Compile Include="Interface\IWorkFlowEditor.cs" />
-    <Compile Include="Interface\WorkFlowitem.cs" />
     <Compile Include="MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Models\WorkFlowLoopEventModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ViewModels\WorkFlowItemViewModel.cs" />
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest">
@@ -124,6 +138,7 @@
     </AppxManifest>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Content\Gif\working.gif" />
     <Content Include="Properties\Default.rd.xml" />
     <Content Include="Assets\LockScreenLogo.scale-200.png" />
     <Content Include="Assets\SplashScreen.scale-200.png" />
@@ -138,15 +153,35 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Page Include="Controls\Shared\ExecutingIndicator.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Controls\Workflow\ConnectorControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\Workflow\ActionWorkFlowItem.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Controls\Workflow\ResultWorkFlowItem.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="Controls\Workflow\WorkFlowEditor.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Controls\Workflow\TriggerWorkflowItem.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Controls\Workflow\WorkFlowItem.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\Workflow\WorkFlowItemContentBase.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -172,7 +207,12 @@
       <Version>5.4.1</Version>
     </PackageReference>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\Workflow.Common\Workflow.Common.csproj">
+      <Project>{9139d990-b6eb-4017-b718-3ff107757bb2}</Project>
+      <Name>Workflow.Common</Name>
+    </ProjectReference>
+  </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>
   </PropertyGroup>

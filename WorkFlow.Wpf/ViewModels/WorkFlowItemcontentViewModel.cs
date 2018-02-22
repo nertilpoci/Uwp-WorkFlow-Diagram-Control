@@ -3,13 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Workflow.Common.Interface;
 
-namespace WorkFlow.Enums
+namespace WorkFlow.Wpf.ViewModels
 {
-    public enum NodeType
-    {
-        Trigger=0,
-        Action=1,
-        Result=2
-    }
+  
 }
