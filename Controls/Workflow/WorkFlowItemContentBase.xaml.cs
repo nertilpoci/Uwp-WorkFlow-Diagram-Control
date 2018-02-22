@@ -12,16 +12,28 @@ using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
+using WorkFlow.Interface;
 
 // The User Control item template is documented at https://go.microsoft.com/fwlink/?LinkId=234236
 
 namespace WorkFlow.Controls.Workflow
 {
-    public sealed partial class WorkFlowItemContent : UserControl
+    public sealed partial class WorkFlowItemContentBase : UserControl, IWorkFlowItemContent
     {
-        public WorkFlowItemContent()
+        public WorkFlowItemContentBase()
         {
             this.InitializeComponent();
+            this.DataContext = this;
+        }
+
+        public IWorkFlowItemContentContext ItemContentContext { get; set; }
+
+        public void AddConnector(IConnector connector)
+        {
+            if (connector.Type == ConnectorType.In) inputConnectors.Children.Add(connector.Element);
+            else outputConnectors.Children.Add(connector.Element);
+            
+            
         }
     }
 }

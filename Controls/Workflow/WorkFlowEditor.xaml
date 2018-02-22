@@ -32,6 +32,7 @@
                             </MenuFlyoutSubItem>
                 </MenuFlyout>
             </Canvas.ContextFlyout>
+                   
                 </Canvas>
         </ScrollViewer>
         </controls:DockPanel>

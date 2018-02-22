@@ -12,24 +12,24 @@ namespace WorkFlow.Interface
    public interface IWorkFlowItem:IUIElement
     {
      IList<IConnector> Connectors { get; set; }
-      IWorkFlowItemContent ItemContent { get; set; }
-     Point Position { get; set; }
+    
+     IWorkFlowItemContent ItemContent { get; set; }
+        Point Position { get; set; }
      IConnector AddConnector(IConnector connector);
      InputOutputConnectorPosition ConnectorLayout { get; set; }
-     void ChangeOrientation(InputOutputConnectorPosition layout);
      void Move(Point point);
     }
 
     public interface IExecutableNode
     {
      bool IsExecuting { get; set; }
-     Func<object[],object> OnExecuteAction { get; set; }
-     void Run(params object[] args);
+    Func<object, Task<object>> OnExecuteAction { get; set; }
+     Task Run(object input = null);
     }
 
     public interface ITriggerNode
     {
-        void Start(params object[] args);
+        Task   Start(params object[] args);
     }
     public interface IUIElement
     {

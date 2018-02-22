@@ -56,12 +56,6 @@ namespace WorkFlow.Controls.Workflow
         }
 
 
-        public void Move( Point point)
-        {
-            base.Move(point, this.ActualWidth, this.ActualHeight);
-        }
-      
-
       
 
         public void ConstructControl(IConnector[] connectors)

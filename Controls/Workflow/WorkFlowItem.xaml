@@ -43,7 +43,6 @@
                  VerticalAlignment="Center" >
                 </StackPanel>
                 <Border CornerRadius="20"  Margin="-10,0,-10,0"    x:Name="itemInfo" HorizontalAlignment="Stretch"  VerticalAlignment="Stretch" Background="#6E9ECF" >
-                <local:WorkFlowItemContent DataContext="{Binding ItemContent}"></local:WorkFlowItemContent>
                
             </Border>
                 

@@ -6,12 +6,18 @@ using System.Threading.Tasks;
 
 namespace WorkFlow.Interface
 {
-    public interface IWorkFlowItemContent
+    public interface IWorkFlowItemContentContext
     {
          string Title { get; set; }
          string Description { get; set; }
          
 
       
+    }
+    public interface IWorkFlowItemContent
+    {
+        void AddConnector(IConnector connector);
+        IWorkFlowItemContentContext ItemContentContext { get; set; }
+
     }
 }

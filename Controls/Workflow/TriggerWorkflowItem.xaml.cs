@@ -25,6 +25,7 @@ using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using WorkFlow.Impl;
 using System.Diagnostics;
+using WorkFlow.ViewModels;
 
 // The User Control item template is documented at https://go.microsoft.com/fwlink/?LinkId=234236
 
@@ -32,24 +33,20 @@ namespace WorkFlow.Controls.Workflow
 {
     public sealed partial class TriggerWorkflowItem : ExecutableNodeBase, IWorkFlowItem, INotifyPropertyChanged, IExecutableNode,ITriggerNode
     {
-        FrameworkElement parent;
         public TriggerWorkflowItem(FrameworkElement parent):base(parent)
         {
             this.InitializeComponent();
+          
             base.Element = this;
             this.DataContext = this;
-            this.parent = parent;
             this.RightTapped += WorkFlowItem_RightTapped;
-            ChangeConnectorLayoutCommand = new RelayCommand<InputOutputConnectorPosition>(ChangeOrientation);
-            var connector = new ConnectorControl { Type = ConnectorType.Out, Label = "Output", Height = 25, Width = 25 };
-                AddConnector(connector);
-            OnExecuteAction = input => {
-                Debug.WriteLine(input); return "test";
+            AddConnector(new ConnectorControl { Type = ConnectorType.Out, Label = "Output", Height = 25, Width = 25, WorkFlowItem = this });
+            OnExecuteAction = async input => {
+                return input;
             };
         }
 
-        public ICommand ChangeConnectorLayoutCommand { get; set; }
-
+      
         private void WorkFlowItem_RightTapped(object sender, RightTappedRoutedEventArgs e)
         {
             e.Handled = true;
@@ -59,87 +56,20 @@ namespace WorkFlow.Controls.Workflow
         }
 
 
-        public void Move( Point point)
-        {
-            base.Move(point, this.ActualWidth, this.ActualHeight);
-        }
+        
       
 
-      
-
-      
-
-        public IConnector AddConnector(IConnector connector)
-        {
-            Connectors.Add(connector);
-            connector.WorkFlowItem = this;
-            if (connector.Type == ConnectorType.In) inputConnectors.Children.Add(connector.Element);
-            else outputConnectors.Children.Add(connector.Element);
-
-            return connector;
-        }
-
-   
-        private void ChangeInputLayout(Windows.UI.Xaml.Controls.Orientation orientation, Dock inputDock, Dock outputDock )
-        {
-            foreach (var item in outputConnectors.Children)
-            {
-                ((FrameworkElement)item).Margin = orientation== Orientation.Vertical? new Thickness(0, 5, 0, 5):new Thickness(5, 0, 5, 0);
-            }
-            foreach (var item in inputConnectors.Children)
-            {
-                ((FrameworkElement)item).Margin = orientation == Orientation.Vertical ?  new Thickness(0, 5, 0, 5): new Thickness(5, 0, 5, 0);
-            }
-            itemInfo.Margin = orientation == Orientation.Vertical ? new Thickness(-10, 0, -10, 0) :  new Thickness(0, -10, 0, -10);
-
-            outputConnectors.Orientation = orientation;
-            inputConnectors.Orientation = orientation;
-          
-            DockPanel.SetDock(inputConnectors, inputDock);
-            DockPanel.SetDock(outputConnectors, outputDock);
-        }
-        public void ChangeOrientation(InputOutputConnectorPosition layout)
-        {
-            switch (layout)
-            {
-                case InputOutputConnectorPosition.LeftRight:
-                    ChangeInputLayout(Orientation.Vertical, Dock.Right, Dock.Left);
-                    break;
-                case InputOutputConnectorPosition.TopBottom:
-                    ChangeInputLayout(Orientation.Horizontal, Dock.Top, Dock.Bottom);
-                    break;
-                case InputOutputConnectorPosition.RightLeft:
-                    ChangeInputLayout(Orientation.Vertical, Dock.Left, Dock.Right);
-
-                    break;
-                case InputOutputConnectorPosition.BottomTop:
-                    ChangeInputLayout(Orientation.Horizontal, Dock.Bottom, Dock.Top);
-                    break;
-                default:
-                    break;  
-            }
-            Move(GetPosition());
-        }
-
-        private void SymbolIcon_Tapped(object sender, TappedRoutedEventArgs e)
-        {
-
-        }
-
-        public  void Run(params object[] args)
-        {
-            base.Run(Connectors.ToArray(), args);
-        }
-
-        public void Start(params object[] args)
+        public async Task Start(params object[] args)
         {
             Debug.WriteLine("trigger started");
-            Run();
+           await Run("Result from trigger");
         }
 
-        private void StartMenuItemClick(object sender, RoutedEventArgs e)
+        private async void StartMenuItemClick(object sender, RoutedEventArgs e)
         {
-            Start();
+           await Start();
         }
+
+     
     }
 }

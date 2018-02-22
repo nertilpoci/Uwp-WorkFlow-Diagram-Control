@@ -65,14 +65,14 @@ namespace WorkFlow.Controls.Workflow
                     Canvas.SetTop(trigger.Element, _canvasLastRightTappedPoint.Y);
                     break;
                 case NodeType.Action:
-                    var action = CreateNewNode(typeof(ActionWorkFlowItem), "Sample Action", "Test trigger node");
+                    var action = CreateNewNode(typeof(ActionWorkFlowItem), "Sample Action", "Test action node");
                     WorkFlowItems.Add(action);
                     editorCanvas.Children.Add(action.Element);
                     Canvas.SetLeft(action.Element, _canvasLastRightTappedPoint.X);
                     Canvas.SetTop(action.Element, _canvasLastRightTappedPoint.Y);
                     break;
                 case NodeType.Result:
-                    var result = CreateNewNode(typeof(TriggerWorkflowItem), "Sample Trigger", "Test trigger node");
+                    var result = CreateNewNode(typeof(ResultWorkflowItem), "Sample Result", "Test result node");
                     WorkFlowItems.Add(result);
                     editorCanvas.Children.Add(result.Element);
                     Canvas.SetLeft(result.Element, _canvasLastRightTappedPoint.X);
@@ -172,8 +172,8 @@ namespace WorkFlow.Controls.Workflow
         {
             IWorkFlowItem item = (IWorkFlowItem)Activator.CreateInstance(type, editorCanvas);
             item.Element.RenderTransform = new TranslateTransform();
-            item.ItemContent.Title =title;
-            item.ItemContent.Description = description;
+            item.ItemContent.ItemContentContext.Title =title;
+            item.ItemContent.ItemContentContext.Description = description;
 
             foreach (var connector in item.Connectors)
             {
@@ -236,6 +236,8 @@ namespace WorkFlow.Controls.Workflow
 
                             MovingLine = new Line();
                             MovingLine = null;
+                            SetResetConnectorCanConnect(null, WorkFlowItems);
+
                         }
                     };
                 }

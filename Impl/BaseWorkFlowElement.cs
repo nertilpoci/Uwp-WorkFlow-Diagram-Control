@@ -24,6 +24,7 @@ using System.Collections.Generic;
 using WorkFlow.Controls.Workflow;
 using System;
 using WorkFlow.ViewModels;
+using System.Threading;
 
 namespace WorkFlow.Impl
 {
@@ -33,14 +34,23 @@ namespace WorkFlow.Impl
         public BaseWorkFlowElement(FrameworkElement parent)
         {
             this.parent = parent;
-            ItemContent = new WorkFlowItemViewModel();
+            ItemContent = new WorkFlowItemContentBase();
+            ItemContent.ItemContentContext = new WorkFlowItemContentViewModel();
+        }
+        public IConnector AddConnector(IConnector connector)
+        {
+            Connectors.Add(connector);
+            ItemContent.AddConnector(connector);
+            return connector;
         }
         public IList<IConnector> Connectors { get; set; } = new List<IConnector>();
         public FrameworkElement Element { get; set; }
         public IWorkFlowItemContent ItemContent { get; set; }
         private float magic = 8;
-        public void Move(Point point,double width, double height)
+        public void Move(Point point)
         {
+            var width = Element.ActualWidth;
+            var height = Element.ActualHeight;
             Canvas.SetLeft(Element, point.X - width / 2);
             Canvas.SetTop(Element, point.Y - height / 2);
 
@@ -88,25 +98,25 @@ namespace WorkFlow.Impl
     public abstract class ExecutableNodeBase:BaseWorkFlowElement
     {
         public ExecutableNodeBase(FrameworkElement parent) : base(parent) { }
-        IConnector[] _connectors;
         private bool _isExecuting;
         public bool IsExecuting { get { return _isExecuting; } set { _isExecuting = value; OnPropertyChanged(); } }
-        public Func<object[], object> OnExecuteAction { get; set; }
-        public async  void Run(IConnector[] connectors, params object[] args)
+        public Func<object, Task<object>> OnExecuteAction { get; set; }
+        public async Task Run( object input=null)
         {
-            _connectors = connectors;
-
-            await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () => { IsExecuting = true; });
-            Task.Run(() => CallNextItem(OnExecuteAction(args)));
+           await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () => { IsExecuting = true; });
+            var result= await Task.Run(() => OnExecuteAction(input));
+           await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () => { IsExecuting = false; });
+            Task.Run(() => CallNextItem(result)); // fire and forget
         }
        
         private void CallNextItem(object input)
         {
-            _connectors.Where(z => z.Type == ConnectorType.Out).ToList().ForEach(connector => {
+            Connectors.Where(z => z.Type == ConnectorType.Out).ToList().ForEach(connector => {
                 Parallel.ForEach(connector.Lines, line => {
                     if (line.End.WorkFlowItem is IExecutableNode) ((IExecutableNode)line.End.WorkFlowItem).Run(input);
                 });
             });
+            
         }
     }
 

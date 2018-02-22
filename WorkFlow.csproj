@@ -95,12 +95,18 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\Shared\ExecutingIndicator.xaml.cs">
+      <DependentUpon>ExecutingIndicator.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\Workflow\ConnectorControl.xaml.cs">
       <DependentUpon>ConnectorControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\Workflow\Line.cs" />
     <Compile Include="Controls\Workflow\ActionWorkFlowItem.xaml.cs">
       <DependentUpon>ActionWorkFlowItem.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\Workflow\ResultWorkFlowItem.xaml.cs">
+      <DependentUpon>ResultWorkFlowItem.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\Workflow\WorkFlowEditor.xaml.cs">
       <DependentUpon>WorkFlowEditor.xaml</DependentUpon>
@@ -111,9 +117,10 @@
     <Compile Include="Controls\Workflow\WorkFlowItem.xaml.cs">
       <DependentUpon>WorkFlowItem.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Controls\Workflow\WorkFlowItemContent.xaml.cs">
-      <DependentUpon>WorkFlowItemContent.xaml</DependentUpon>
+    <Compile Include="Controls\Workflow\WorkFlowItemContentBase.xaml.cs">
+      <DependentUpon>WorkFlowItemContentBase.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Converters\BoolToVisibilityConverter.cs" />
     <Compile Include="Enums\InputOutputConnectorPosition.cs" />
     <Compile Include="Enums\NodeType.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
@@ -135,6 +142,7 @@
     </AppxManifest>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Content\Gif\working.gif" />
     <Content Include="Properties\Default.rd.xml" />
     <Content Include="Assets\LockScreenLogo.scale-200.png" />
     <Content Include="Assets\SplashScreen.scale-200.png" />
@@ -149,11 +157,19 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Page Include="Controls\Shared\ExecutingIndicator.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Controls\Workflow\ConnectorControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Controls\Workflow\ActionWorkFlowItem.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Controls\Workflow\ResultWorkFlowItem.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -169,7 +185,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Controls\Workflow\WorkFlowItemContent.xaml">
+    <Page Include="Controls\Workflow\WorkFlowItemContentBase.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

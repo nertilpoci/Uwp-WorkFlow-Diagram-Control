@@ -25,31 +25,45 @@ using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using WorkFlow.Impl;
 using System.Diagnostics;
+using WorkFlow.ViewModels;
+using Windows.UI.Popups;
 
 // The User Control item template is documented at https://go.microsoft.com/fwlink/?LinkId=234236
 
 namespace WorkFlow.Controls.Workflow
 {
-    public sealed partial class ActionWorkFlowItem : ExecutableNodeBase, IWorkFlowItem, INotifyPropertyChanged, IExecutableNode
+    public sealed partial class ResultWorkflowItem : ExecutableNodeBase, IWorkFlowItem, INotifyPropertyChanged, IExecutableNode
     {
-        FrameworkElement parent;
-        public ActionWorkFlowItem(FrameworkElement parent):base(parent)
+        public ResultWorkflowItem(FrameworkElement parent):base(parent)
         {
             this.InitializeComponent();
+          
             base.Element = this;
             this.DataContext = this;
-            this.parent = parent;
+            this.RightTapped += WorkFlowItem_RightTapped;
             AddConnector(new ConnectorControl { Type = ConnectorType.In, Label = "Input", Height = 25, Width = 25, WorkFlowItem = this });
-            AddConnector(new ConnectorControl { Type = ConnectorType.Out, Label = "Output", Height = 25, Width = 25, WorkFlowItem = this });
             OnExecuteAction = async input => {
-                await Task.Delay(5000);
-                return input;
+                var dialog = new MessageDialog(input.ToString());
+                await Dispatcher.RunAsync(CoreDispatcherPriority.Normal,async () => await dialog.ShowAsync() ); 
+                return null;
             };
         }
 
+      
+        private void WorkFlowItem_RightTapped(object sender, RightTappedRoutedEventArgs e)
+        {
+            e.Handled = true;
+            
+            //this.magic += Window.Current.CoreWindow.GetKeyState(VirtualKey.Control).HasFlag(CoreVirtualKeyStates.Down)?  -1:1;
+            //Move(GetPosition());
+        }
+
+
+        
+      
+
 
        
-
 
      
     }
