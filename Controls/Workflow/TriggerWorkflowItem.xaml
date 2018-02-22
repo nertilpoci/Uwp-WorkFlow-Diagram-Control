@@ -1,0 +1,29 @@
+﻿<base:ExecutableNodeBase
+    x:Class="WorkFlow.Controls.Workflow.TriggerWorkflowItem"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:WorkFlow.Controls.Workflow"
+    xmlns:enums="using:WorkFlow.Enums"
+    xmlns:controls="using:WorkFlow.Controls.Workflow"
+    xmlns:base="using:WorkFlow.Impl"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+ xmlns:winControls="using:Microsoft.Toolkit.Uwp.UI.Controls"
+
+    mc:Ignorable="d" 
+   Width="200" Height="100">
+
+    <Grid  Name="main">
+
+
+        <Grid.ContextFlyout>
+            <MenuFlyout>
+
+                <MenuFlyoutItem Text="Start" Click="StartMenuItemClick" />
+            </MenuFlyout>
+        </Grid.ContextFlyout>
+
+        <ContentPresenter Content="{Binding ItemContent}"></ContentPresenter>
+
+    </Grid>
+</base:ExecutableNodeBase>
