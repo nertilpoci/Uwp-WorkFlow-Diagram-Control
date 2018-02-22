@@ -16,7 +16,6 @@ using Workflow.Common.Enums;
 using Workflow.Common.Interface;
 using Workflow.Common.Models;
 using WorkFlow.Extensions;
-using WorkFlow.Wpf.Extensions;
 
 // The User Control item template is documented at https://go.microsoft.com/fwlink/?LinkId=234236
 

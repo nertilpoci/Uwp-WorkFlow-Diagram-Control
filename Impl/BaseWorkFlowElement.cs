@@ -14,7 +14,6 @@ using Workflow.Common.Enums;
 using Workflow.Common.Interface;
 using WorkFlow.Extensions;
 using Workflow.Common.Models;
-using WorkFlow.Wpf.Extensions;
 
 namespace WorkFlow.Impl
 {

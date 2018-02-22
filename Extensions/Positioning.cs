@@ -8,7 +8,7 @@ using Windows.UI;
 using Windows.UI.Xaml.Media;
 using Workflow.Common.Models;
 
-namespace WorkFlow.Wpf.Extensions
+namespace WorkFlow.Extensions
 {
   public static  class PositioningExtensions
     {
