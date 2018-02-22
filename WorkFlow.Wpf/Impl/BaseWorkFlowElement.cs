@@ -1,22 +1,21 @@
 ﻿using System.Linq;
-using Windows.Foundation;
-using Windows.UI.Core;
-using Windows.UI.Xaml;
-using Windows.UI.Xaml.Controls;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using WorkFlow.Controls.Workflow;
 using System;
-using WorkFlow.ViewModels;
-using Workflow.Common.Enums;
+using System.Windows;
+using System.Windows.Controls;
 using Workflow.Common.Interface;
-using WorkFlow.Extensions;
+using WorkFlow.Wpf.Controls.Workflow;
+using WorkFlow.Wpf.ViewModels;
 using Workflow.Common.Models;
+using Workflow.Common.Enums;
+using WorkFlow.Extensions;
 using WorkFlow.Wpf.Extensions;
 
-namespace WorkFlow.Impl
+namespace WorkFlow.Wpf.Impl
 {
     public abstract class BaseWorkFlowElement: UserControl
     {
@@ -39,10 +38,10 @@ namespace WorkFlow.Impl
         private float magic = 8;
         public void Move(WorkFlowPoint point)
         {
-            var width = ((FrameworkElement)Element).ActualWidth;
-            var height = ((FrameworkElement)Element).ActualHeight;
-            Canvas.SetLeft((FrameworkElement)Element, point.X - width / 2);
-            Canvas.SetTop((FrameworkElement)Element, point.Y - height / 2);
+            var width = Element.ToFrameworkElement().ActualWidth;
+            var height = Element.ToFrameworkElement().ActualHeight;
+            Canvas.SetLeft(Element.ToFrameworkElement(), point.X - width / 2);
+            Canvas.SetTop(Element.ToFrameworkElement(), point.Y - height / 2);
 
             foreach (var connector in this.Connectors.Where(z => z.Lines.Any()))
             {
@@ -52,7 +51,7 @@ namespace WorkFlow.Impl
                     var ui = connector as UserControl;
                     var transform = ui.TransformToVisual(parent);
 
-                    Point absolutePosition = transform.TransformPoint(new Windows.Foundation.Point(0, 0));
+                    Point absolutePosition = transform.Transform(new Point(0, 0));
                     absolutePosition.X += ui.ActualWidth / 2;
                     absolutePosition.Y +=ui.ActualHeight / 2;
                     if (connector.Type == ConnectorType.In)
@@ -79,7 +78,7 @@ namespace WorkFlow.Impl
         public WorkFlowPoint Position { get { return GetPosition().CreateWorkFlowPoint(); } set { _position = value; } }
         public Point GetPosition()
         {
-            return ((FrameworkElement)Element).TransformToVisual(parent).TransformPoint(new Point(0, 0)); ;
+            return Element.ToFrameworkElement().TransformToVisual(parent).Transform(new Point(0, 0)); ;
         }
 
        
@@ -93,9 +92,9 @@ namespace WorkFlow.Impl
         public Func<object, Task<object>> OnExecuteAction { get; set; }
         public async Task Run( object input=null)
         {
-           await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () => { IsExecuting = true; });
+           //await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () => { IsExecuting = true; });
             var result= await Task.Run(() => OnExecuteAction(input));
-           await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () => { IsExecuting = false; });
+           //await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () => { IsExecuting = false; });
             Task.Run(() => CallNextItem(result)); // fire and forget
         }
        

@@ -1,21 +1,17 @@
-﻿
-using GalaSoft.MvvmLight.Command;
+﻿using GalaSoft.MvvmLight.Command;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
-using Windows.Foundation;
-using Windows.System;
-using Windows.UI.Core;
-using Windows.UI.Popups;
-using Windows.UI.Xaml;
-using Windows.UI.Xaml.Controls;
-using Windows.UI.Xaml.Input;
-using Windows.UI.Xaml.Media;
+using System.Windows.Media;
+using System.Windows.Shapes;
 using Workflow.Common.Enums;
 using Workflow.Common.Interface;
 using Workflow.Common.Models;
 using WorkFlow.Extensions;
+using WorkFlow.Wpf.Controls.Workflow;
 using WorkFlow.Wpf.Extensions;
 
 // The User Control item template is documented at https://go.microsoft.com/fwlink/?LinkId=234236
@@ -36,10 +32,9 @@ namespace WorkFlow.Controls.Workflow
             SetScrollViewerEvents();
             SetCanvasEvents();
          
-            LoopDetected += async (s, e) =>{
+            LoopDetected +=  (s, e) =>{
 
-                var dialog = new MessageDialog("This Connection creates a loop, loops are not allowed");
-                await dialog.ShowAsync();
+                MessageBox.Show("This Connection creates a loop, loops are not allowed");
             };
             NewNodeCommand = new RelayCommand<NodeType>(CreateNode);
         }
@@ -49,7 +44,7 @@ namespace WorkFlow.Controls.Workflow
             switch (nodeType)
             {
                 case NodeType.Trigger:
-                    var trigger=  CreateNewNode(typeof(TriggerWorkflowItem), "Sample Trigger", "Test trigger node");
+                    var trigger = CreateNewNode(typeof(TriggerWorkFlowItem), "Sample Trigger", "Test trigger node");
                     WorkFlowItems.Add(trigger);
                     editorCanvas.Children.Add(trigger.Element.ToFrameworkElement());
                     Canvas.SetLeft(trigger.Element.ToFrameworkElement(), _canvasLastRightTappedPoint.X);
@@ -63,10 +58,10 @@ namespace WorkFlow.Controls.Workflow
                     Canvas.SetTop(action.Element.ToFrameworkElement(), _canvasLastRightTappedPoint.Y);
                     break;
                 case NodeType.Result:
-                    var result = CreateNewNode(typeof(ResultWorkflowItem), "Sample Result", "Test result node");
+                    var result = CreateNewNode(typeof(ResultWorkFlowItem), "Sample Result", "Test result node");
                     WorkFlowItems.Add(result);
                     editorCanvas.Children.Add(result.Element.ToFrameworkElement());
-                    Canvas.SetLeft(result.Element.ToFrameworkElement(), _canvasLastRightTappedPoint.X);
+                    Canvas.SetLeft(result.Element.ToFrameworkElement().ToFrameworkElement(), _canvasLastRightTappedPoint.X);
                     Canvas.SetTop(result.Element.ToFrameworkElement(), _canvasLastRightTappedPoint.Y);
                     break;
                 default:
@@ -78,56 +73,56 @@ namespace WorkFlow.Controls.Workflow
      
         private void SetScrollViewerEvents()
         {
-            Point scrollPoint;
-            scroller.PointerPressed += (s, e) =>
-            {
-                if (Window.Current.CoreWindow.GetKeyState(VirtualKey.Control).HasFlag(CoreVirtualKeyStates.Down))
-                {
-                    e.Handled = true;
-                    var sender = s as FrameworkElement;
-                    sender.CapturePointer(e.Pointer);
-                    scrollPoint = e.GetCurrentPoint(editorCanvas).Position;
-                }
-            };
+            //Point scrollPoint;
+            //scroller.PointerPressed += (s, e) =>
+            //{
+            //    if (Window.Current.CoreWindow.GetKeyState(VirtualKey.Control).HasFlag(CoreVirtualKeyStates.Down))
+            //    {
+            //        e.Handled = true;
+            //        var sender = s as FrameworkElement;
+            //        sender.CapturePointer(e.Pointer);
+            //        scrollPoint = e.GetCurrentPoint(editorCanvas).Position;
+            //    }
+            //};
 
-            scroller.PointerMoved += (s, e) =>
-            {
-                var sender = s as FrameworkElement;
-                if (sender.PointerCaptures != null && sender.PointerCaptures.Any())
-                {
-                    e.Handled = true;
-                    var newPoint = e.GetCurrentPoint(scroller).Position;
-                    var vOffset = scroller.VerticalOffset + (scrollPoint.Y - newPoint.Y);
-                    var hOffset = scroller.HorizontalOffset + (scrollPoint.X - newPoint.X);
-                    scroller.ChangeView(hOffset, vOffset, scroller.ZoomFactor);
-                }
-            };
+            //scroller.PointerMoved += (s, e) =>
+            //{
+            //    var sender = s as FrameworkElement;
+            //    if (sender.PointerCaptures != null && sender.PointerCaptures.Any())
+            //    {
+            //        e.Handled = true;
+            //        var newPoint = e.GetCurrentPoint(scroller).Position;
+            //        var vOffset = scroller.VerticalOffset + (scrollPoint.Y - newPoint.Y);
+            //        var hOffset = scroller.HorizontalOffset + (scrollPoint.X - newPoint.X);
+            //        scroller.ChangeView(hOffset, vOffset, scroller.ZoomFactor);
+            //    }
+            //};
 
-            scroller.PointerReleased += (s, e) =>
-            {
-                var sender = s as FrameworkElement;
-                sender.ReleasePointerCaptures();
-            };
+            //scroller.PointerReleased += (s, e) =>
+            //{
+            //    var sender = s as FrameworkElement;
+            //    sender.ReleasePointerCaptures();
+            //};
         }
         private Point _canvasLastRightTappedPoint=new Point(100,100);
         private void SetCanvasEvents()
         {
-               editorCanvas.IsRightTapEnabled = true;
-            editorCanvas.RightTapped += (s, e) =>
+            editorCanvas.MouseRightButtonUp += (s, e) =>
             {
                 _canvasLastRightTappedPoint = e.GetPosition(editorCanvas);
                 
 
             };
 
-            editorCanvas.PointerReleased += (s, e) =>
+            editorCanvas.ToFrameworkElement().MouseLeftButtonUp += (s, e) =>
             {
                 ConnectionCreateCleanup();
             };
 
-            editorCanvas.PointerMoved += (s, e) => {
+            editorCanvas.ToFrameworkElement().MouseMove += (s, e) =>
+            {
                 if (MovingLine == null) return;
-                MovingLine.DrawPath(MovingLine.Start.Point, e.GetCurrentPoint(editorCanvas).Position.CreateWorkFlowPoint());
+                MovingLine.DrawPath(MovingLine.Start.Point, e.GetPosition(editorCanvas).CreateWorkFlowPoint());
             };
 
         }
@@ -162,53 +157,54 @@ namespace WorkFlow.Controls.Workflow
         private IWorkFlowItem CreateNewNode(Type type, string title, string description)
         {
             IWorkFlowItem item = (IWorkFlowItem)Activator.CreateInstance(type, editorCanvas);
-            item.Element.ToFrameworkElement().RenderTransform = new TranslateTransform();
             item.ItemContent.ItemContentContext.Title =title;
             item.ItemContent.ItemContentContext.Description = description;
 
             foreach (var connector in item.Connectors)
             {
-                connector.Element.ToFrameworkElement().PointerEntered += (s, e) => {
+                connector.Element.ToFrameworkElement().MouseEnter += (s, e) =>
+                {
                     connector.MouseIn();
                 };
-                item.Element.ToFrameworkElement().PointerExited += (s, e) => {
+                item.Element.ToFrameworkElement().MouseLeave += (s, e) =>
+                {
                     connector.MouseOut();
                 };
 
                 if (connector.Type == ConnectorType.Out)
                 {
-                    connector.Element.ToFrameworkElement().PointerPressed += (s, e) =>
+                    connector.Element.ToFrameworkElement().MouseLeftButtonDown += (s, e) =>
                     {
                         e.Handled = true;
-                        connector.Point = e.GetCurrentPoint(editorCanvas).Position.CreateWorkFlowPoint();
+                        connector.Point = e.GetPosition(editorCanvas).CreateWorkFlowPoint();
 
-                        MovingLine =CreateLine(connector, null);
+                        MovingLine = CreateLine(connector, null);
                         connector.Lines.Add(MovingLine);
                         editorCanvas.Children.Add(MovingLine.Element.ToFrameworkElement());
-                        SetResetConnectorCanConnect(MovingLine,WorkFlowItems);
+                        SetResetConnectorCanConnect(MovingLine, WorkFlowItems);
                     };
 
-                    connector.Element.ToFrameworkElement().PointerReleased += (s, e) =>
+                    connector.Element.ToFrameworkElement().MouseLeftButtonUp += (s, e) =>
                     {
                         ConnectionCreateCleanup();
                     };
                 }
                 else
                 {
-                    connector.Element.ToFrameworkElement().PointerReleased += (s, e) =>
+                    connector.Element.ToFrameworkElement().MouseLeftButtonUp += (s, e) =>
                     {
 
                         if (MovingLine != null)
                         {
                             e.Handled = true;
 
-                            if(!connector.CanConnect(MovingLine))
+                            if (!connector.CanConnect(MovingLine))
                             {
                                 ConnectionCreateCleanup();
                                 return;
                             }
 
-                            if (IsLoop(MovingLine.Start,connector))
+                            if (IsLoop(MovingLine.Start, connector))
                             {
                                 OnLoopDetected(new WorkFlowLoopEventModel(MovingLine.Start, connector));
 
@@ -217,10 +213,10 @@ namespace WorkFlow.Controls.Workflow
                                     ConnectionCreateCleanup();
                                     return;
                                 }
-                              
+
                             }
 
-                            connector.Point = e.GetCurrentPoint(editorCanvas).Position.CreateWorkFlowPoint();
+                            connector.Point = e.GetPosition(editorCanvas).CreateWorkFlowPoint();
                             MovingLine.End = connector;
                             MovingLine.DrawPath(MovingLine.Start.Point, MovingLine.End.Point);
                             connector.Lines.Add(MovingLine);
@@ -235,22 +231,22 @@ namespace WorkFlow.Controls.Workflow
             }
 
 
-            item.Element.ToFrameworkElement().PointerPressed += (s, e) =>
+            item.Element.ToFrameworkElement().MouseLeftButtonDown += (s, e) =>
             {
                 e.Handled = true;
                 var sender = s as FrameworkElement;
-                sender.CapturePointer(e.Pointer);
+                sender.CaptureMouse();
             };
 
-            item.Element.ToFrameworkElement().PointerReleased += (s, e) =>
+            item.Element.ToFrameworkElement().MouseLeftButtonUp += (s, e) =>
             {
                 e.Handled = true;
                 var sender = s as FrameworkElement;
-                sender.ReleasePointerCapture(e.Pointer);
+                sender.ReleaseMouseCapture();
                 ConnectionCreateCleanup();
             };
 
-            item.Element.ToFrameworkElement().PointerMoved += (s, e) =>
+            item.Element.ToFrameworkElement().MouseMove += (s, e) =>
             {
                 editorCanvas.Width = editorCanvas.ActualWidth;
                 editorCanvas.Height = editorCanvas.ActualHeight;
@@ -259,29 +255,29 @@ namespace WorkFlow.Controls.Workflow
 
                 e.Handled = true;
                 var sender = s as FrameworkElement;
-                if (sender.PointerCaptures != null && sender.PointerCaptures.Any())
+                if (sender.IsMouseCaptured )
                 {
-                    var point = e.GetCurrentPoint(editorCanvas).Position;
+                    var point = e.GetPosition(editorCanvas);
 
                     if (point.X >= editorCanvas.Width - ItemWidth)
                     {
-                        editorCanvas.Width += 50; scroller.ChangeView(editorCanvas.Width, null, scroller.ZoomFactor);
+                        editorCanvas.Width += 50; scroller.ScrollToHorizontalOffset(editorCanvas.Width);
                     }
-                    if (point.Y >= editorCanvas.Height - ItemHeight) { editorCanvas.Height += 50; scroller.ChangeView(null, editorCanvas.Height, scroller.ZoomFactor); }
+                    if (point.Y >= editorCanvas.Height - ItemHeight) { editorCanvas.Height += 50; scroller.ScrollToVerticalOffset( editorCanvas.Height); }
 
 
                     if (point.X >= scroller.ActualWidth + scroller.HorizontalOffset - ItemWidth)
                     {
-                        scroller.ChangeView(scroller.HorizontalOffset + 50, null, scroller.ZoomFactor);
+                        scroller.ScrollToHorizontalOffset(scroller.HorizontalOffset + 50 );
                     }
-                    if (point.Y >= scroller.VerticalOffset + scroller.ActualHeight - ItemHeight) { scroller.ChangeView(null, scroller.VerticalOffset + 50, scroller.ZoomFactor); }
+                    if (point.Y >= scroller.VerticalOffset + scroller.ActualHeight - ItemHeight) { scroller.ScrollToVerticalOffset(scroller.VerticalOffset + 50 ); }
 
 
-                    if (point.X < scroller.HorizontalOffset + ItemWidth/2 )
+                    if (point.X < scroller.HorizontalOffset + ItemWidth / 2)
                     {
-                        scroller.ChangeView(scroller.HorizontalOffset - 20, null, scroller.ZoomFactor);
+                        scroller.ScrollToHorizontalOffset(scroller.HorizontalOffset - 20);
                     }
-                    if (point.Y <scroller.VerticalOffset + ItemHeight/2) { scroller.ChangeView(null, scroller.VerticalOffset - 20, scroller.ZoomFactor); }
+                    if (point.Y < scroller.VerticalOffset + ItemHeight / 2) { scroller.ScrollToVerticalOffset(scroller.VerticalOffset - 20); }
 
 
 
@@ -300,14 +296,14 @@ namespace WorkFlow.Controls.Workflow
                 Start = start,
                 End = end
             };
-            line.RightTapped += Line_RightTapped;
-            line.LineDeleted += Line_LineDeleted;
-            line.Element.ToFrameworkElement().PointerEntered += (s,e)=> { line.MouseIn(); };
-            line.Element.ToFrameworkElement().PointerExited += (s, e) => { line.MouseOut(); };
+            //line.RightTapped += Line_RightTapped;
+            //line.LineDeleted += Line_LineDeleted;
+            //line.Element.PointerEntered += (s,e)=> { line.MouseIn(); };
+            //line.Element.PointerExited += (s, e) => { line.MouseOut(); };
             return line;
         }
         public ICommand NewNodeCommand { get; set; }
-        private void Line_RightTapped(object sender, RightTappedRoutedEventArgs e)
+        private void Line_RightTapped(object sender, MouseEventArgs e)
         {
             e.Handled = true;
         }
@@ -360,8 +356,8 @@ namespace WorkFlow.Controls.Workflow
                 pf.Segments.Add(s);
             }
             geo.Figures.Add(pf);
-            path.Data = geo;
-            Canvas.SetZIndex(path, -2);
+            ((Path)path.Element).Data = geo;
+            Canvas.SetZIndex(((Path)path.Element), -2);
         }
         private bool IsLoop(IConnector start, IConnector end)
         {

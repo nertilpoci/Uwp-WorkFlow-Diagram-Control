@@ -1,14 +1,14 @@
-﻿using Windows.UI.Xaml;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Threading.Tasks;
-using WorkFlow.Impl;
 using Workflow.Common.Interface;
 using Workflow.Common.Enums;
-using Workflow.Common.Models;
+using System.Windows;
+using WorkFlow.Wpf.Impl;
+using WorkFlow.Controls.Workflow;
 
 // The User Control item template is documented at https://go.microsoft.com/fwlink/?LinkId=234236
 
-namespace WorkFlow.Controls.Workflow
+namespace WorkFlow.Wpf.Controls.Workflow 
 {
     public sealed partial class ActionWorkFlowItem : ExecutableNodeBase, IWorkFlowItem, INotifyPropertyChanged, IExecutableNode
     {

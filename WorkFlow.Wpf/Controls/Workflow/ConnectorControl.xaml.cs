@@ -1,9 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using Windows.Foundation;
-using Windows.UI.Xaml;
-using Windows.UI.Xaml.Controls;
-using Windows.UI.Xaml.Media;
+using System.Windows.Controls;
+using System.Windows.Media;
 using Workflow.Common.Enums;
 using Workflow.Common.Interface;
 using Workflow.Common.Models;

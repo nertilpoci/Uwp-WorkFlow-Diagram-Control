@@ -1,72 +1,54 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Windows.UI;
-using Windows.UI.Xaml;
-using Windows.UI.Xaml.Controls;
-using Windows.UI.Xaml.Media;
-using Windows.UI.Xaml.Shapes;
+using System.Windows.Controls;
+using System.Windows.Ink;
+using System.Windows.Media;
+using System.Windows.Shapes;
 using Workflow.Common.Interface;
 using Workflow.Common.Models;
 using WorkFlow.Extensions;
+using WorkFlow.Wpf.Extensions;
 
 namespace WorkFlow.Controls.Workflow
 {
-    public class Line : Path, ILine
+    public class Line : ILine
     {
         private string normalStroke = "#4D648D";
         private string mouseOverStroke = "#005b96";
+
         public Line()
         {
 
-            //Stroke = new LinearGradientBrush()
-            //{
-            //    EndPoint = new Point(0.5, 1),
-            //    StartPoint = new Point(0.5, 0),
-            //    GradientStops = new GradientStopCollection() {
-            //            new GradientStop { Color= "#4D648D".HexToColor() },
+            Element = new Path
+            {
+                Stroke = new SolidColorBrush(normalStroke.HexToColor()),
+                StrokeThickness = 5,
+                StrokeStartLineCap = PenLineCap.Square,
+                StrokeEndLineCap = PenLineCap.Square
+            };
 
-            //            new GradientStop { Color= "#F1F1F2".HexToColor(),Offset=0.23 },
-            //            new GradientStop { Color= "#4D648D".HexToColor(),Offset=0.80 }
-            //}
-            //};
-            Stroke = new SolidColorBrush(normalStroke.HexToColor());
-            StrokeThickness = 5;
-            StrokeStartLineCap = PenLineCap.Square;
-            StrokeEndLineCap = PenLineCap.Square;
-            SetContextMenu();
-            
         }
 
         public event EventHandler<ILine> LineDeleted;
         private void OnLineDeleted(ILine e)
         {
-            LineDeleted?.Invoke(this, e);
+            LineDeleted?.Invoke(this.Element, e);
         }
 
         private void SetContextMenu()
         {
-            MenuFlyout lineMenu = new MenuFlyout();
-            MenuFlyoutItem deleteItem = new MenuFlyoutItem { Text = "Remove Connection", Icon = new SymbolIcon(Symbol.Delete) };
-            deleteItem.Click += DeleteLine;
-            lineMenu.Items.Add(deleteItem);
-            this.ContextFlyout = lineMenu;
+          
         }
 
-        private void DeleteLine(object sender, RoutedEventArgs e)
-        {
-            Delete();
-        }
+       
 
         public string Label { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public void MouseIn () { Stroke = new SolidColorBrush(mouseOverStroke.HexToColor()); }
-        public void MouseOut() { Stroke = new SolidColorBrush(normalStroke.HexToColor()); }
+        public void MouseIn() { ((Path)Element).Stroke = new SolidColorBrush(normalStroke.HexToColor()); }
+        public void MouseOut() { ((Path)Element).Stroke = new SolidColorBrush(mouseOverStroke.HexToColor()); }
         public IConnector Start { get; set; }
         public IConnector End { get; set; }
 
-        public object Element => this;
+        public object Element {get; }
 
         public void DrawPath(WorkFlowPoint source, WorkFlowPoint destination,float magic=8)
         {
@@ -101,8 +83,8 @@ namespace WorkFlow.Controls.Workflow
                 pf.Segments.Add(s);
             }
             geo.Figures.Add(pf);
-            this.Data = geo;
-            Canvas.SetZIndex(this, -2);
+            ((Path)Element).Data = geo;
+            Canvas.SetZIndex(((Path)Element), -2);
         }
 
         public void Delete()

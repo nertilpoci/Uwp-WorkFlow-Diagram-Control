@@ -121,18 +121,14 @@
       <DependentUpon>WorkFlowItemContentBase.xaml</DependentUpon>
     </Compile>
     <Compile Include="Converters\BoolToVisibilityConverter.cs" />
-    <Compile Include="Enums\InputOutputConnectorPosition.cs" />
-    <Compile Include="Enums\NodeType.cs" />
+    <Compile Include="Extensions\UiExtensions.cs" />
+    <Compile Include="Extensions\Positioning.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="GestureRecognizer.cs" />
     <Compile Include="Impl\BaseWorkFlowElement.cs" />
-    <Compile Include="Interface\IWorkCodeContent.cs" />
-    <Compile Include="Interface\IWorkFlowEditor.cs" />
-    <Compile Include="Interface\WorkFlowitem.cs" />
     <Compile Include="MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Models\WorkFlowLoopEventModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ViewModels\WorkFlowItemViewModel.cs" />
   </ItemGroup>
@@ -211,7 +207,12 @@
       <Version>5.4.1</Version>
     </PackageReference>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\Workflow.Common\Workflow.Common.csproj">
+      <Project>{9139d990-b6eb-4017-b718-3ff107757bb2}</Project>
+      <Name>Workflow.Common</Name>
+    </ProjectReference>
+  </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>
   </PropertyGroup>

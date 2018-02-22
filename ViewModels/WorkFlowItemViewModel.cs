@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using WorkFlow.Interface;
+using Workflow.Common.Interface;
 
 namespace WorkFlow.ViewModels
 {
