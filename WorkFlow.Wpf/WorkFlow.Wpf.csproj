@@ -165,11 +165,10 @@
     <Resource Include="Content\Gif\working.gif" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Workflow.Common\Workflow.Common.csproj">
-      <Project>{9139d990-b6eb-4017-b718-3ff107757bb2}</Project>
+    <ProjectReference Include="..\Workflow.Common\Workflow.Common.csproj">
+      <Project>{ba0edd8e-ab2c-40f3-9a0f-fddbc3f83108}</Project>
       <Name>Workflow.Common</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
