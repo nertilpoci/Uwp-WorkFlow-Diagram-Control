@@ -1,0 +1,22 @@
+﻿<UserControl
+   x:Class="WorkFlow.Wpf.WorkFlowItems.Controls.WorkFlowItemControl"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:shared="clr-namespace:WorkFlow.Wpf.Controls.Shared"
+    xmlns:converters="clr-namespace:WorkFlow.Wpf.Converters"
+    mc:Ignorable="d" 
+   Width="200" Height="100">
+    <UserControl.Resources>
+        <converters:BoolToVisibilityConverter x:Key="boolToVisibleConverter"></converters:BoolToVisibilityConverter>
+    </UserControl.Resources>
+
+    <Grid  Name="main" >
+        <ContentPresenter Content="{Binding ItemContent, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></ContentPresenter>
+
+        <Border CornerRadius="20" Width="25" Height="25"   HorizontalAlignment="Right"  Margin="0,0,20,3"    Visibility="{Binding IsExecuting, Converter={StaticResource boolToVisibleConverter}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"   VerticalAlignment="Bottom" >
+            <shared:ExecutingIndicator ></shared:ExecutingIndicator>
+        </Border>
+    </Grid>
+</UserControl>
