@@ -1,0 +1,42 @@
+﻿<UserControl
+    x:Class="WorkFlow.WorkFlowItems.Controls.WorkFlowEditor"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:WorkFlow.Controls.Workflow"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d" 
+     xmlns:controls="using:Microsoft.Toolkit.Uwp.UI.Controls"
+    xmlns:enums="using:Workflow.Common.Enums"
+
+    HorizontalAlignment="Stretch"  VerticalAlignment="Stretch"
+   
+   >
+
+    <Grid Name="container"    HorizontalAlignment="Stretch"  VerticalAlignment="Stretch" >
+
+            <controls:DockPanel  LastChildFill="True" >
+            <ScrollViewer  ZoomMode="Enabled"  HorizontalScrollMode="Enabled" HorizontalAlignment="Stretch"  VerticalAlignment="Stretch" Name="scroller" Background="Red" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden">
+
+                <Canvas Background="#EFEFEF" MinHeight="300" MinWidth="300"    x:Name="editorCanvas" >
+                    <Canvas.ContextFlyout>
+                <MenuFlyout>
+                    <MenuFlyoutSubItem Text="New Node">
+
+                                <MenuFlyoutItem Text="Trigger" Command="{Binding NewNodeCommand}" CommandParameter="{ x:Bind enums:NodeType.Trigger}" />
+                                <MenuFlyoutItem Text="Action" Command="{Binding NewNodeCommand}" CommandParameter="{ x:Bind enums:NodeType.Action}" />
+                                <MenuFlyoutItem Text="Result" Command="{Binding NewNodeCommand}" CommandParameter="{ x:Bind enums:NodeType.Result}" />
+
+
+
+                            </MenuFlyoutSubItem>
+                </MenuFlyout>
+            </Canvas.ContextFlyout>
+                   
+                </Canvas>
+        </ScrollViewer>
+        </controls:DockPanel>
+
+
+    </Grid>
+</UserControl>
