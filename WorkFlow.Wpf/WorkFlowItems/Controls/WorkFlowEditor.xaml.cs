@@ -1,17 +1,18 @@
 ﻿using GalaSoft.MvvmLight.Command;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows.Media;
 using Workflow.Common.Enums;
 using Workflow.Common.Interface;
 using Workflow.Common.Models;
 using WorkFlow.Extensions;
 using WorkFlow.Wpf.Extensions;
 using WorkFlow.Wpf.WorkFlowItems.Items;
+using ZoomAndPan;
 
 namespace WorkFlow.Wpf.WorkFlowItems.Controls
 {
@@ -159,6 +160,8 @@ namespace WorkFlow.Wpf.WorkFlowItems.Controls
         private IWorkFlowItem CreateNewNode(Type type, string title, string description)
         {
             IWorkFlowItem item = (IWorkFlowItem)Activator.CreateInstance(type, editorCanvas);
+
+
             item.ItemContent.ItemContentContext.Title = title;
             item.ItemContent.ItemContentContext.Description = description;
 
@@ -254,8 +257,7 @@ namespace WorkFlow.Wpf.WorkFlowItems.Controls
             {
                 editorCanvas.Width = editorCanvas.ActualWidth;
                 editorCanvas.Height = editorCanvas.ActualHeight;
-                scroller.Width = scroller.ActualWidth;
-                scroller.Height = scroller.ActualHeight;
+               
 
                 e.Handled = true;
                 var sender = s as FrameworkElement;
@@ -263,33 +265,33 @@ namespace WorkFlow.Wpf.WorkFlowItems.Controls
                 {
                     var point = e.GetPosition(editorCanvas);
 
-                    if (point.X >= editorCanvas.Width - ItemWidth)
+                    if (point.X >= editorCanvas.Width - ItemWidth +10)
                     {
-                        editorCanvas.Width += 50; scroller.ScrollToHorizontalOffset(editorCanvas.Width);
+                        editorCanvas.Width += 5;
+                        zoomAndPanControl.ContentOffsetX += 5;
                     }
-                    if (point.Y >= editorCanvas.Height - ItemHeight) { editorCanvas.Height += 50; scroller.ScrollToVerticalOffset(editorCanvas.Height); }
-
-
-                    if (point.X >= scroller.ActualWidth + scroller.HorizontalOffset - ItemWidth)
+                    if (point.Y >= editorCanvas.Height - ItemWidth +10)
                     {
-                        scroller.ScrollToHorizontalOffset(scroller.HorizontalOffset + 50);
+                        editorCanvas.Height += 5;
+                        zoomAndPanControl.ContentOffsetY +=5;
                     }
-                    if (point.Y >= scroller.VerticalOffset + scroller.ActualHeight - ItemHeight) { scroller.ScrollToVerticalOffset(scroller.VerticalOffset + 50); }
 
-
-                    if (point.X < scroller.HorizontalOffset + ItemWidth / 2)
-                    {
-                        scroller.ScrollToHorizontalOffset(scroller.HorizontalOffset - 20);
-                    }
-                    if (point.Y < scroller.VerticalOffset + ItemHeight / 2) { scroller.ScrollToVerticalOffset(scroller.VerticalOffset - 20); }
-
+                    if (point.X <= 100) return;
+                    if (point.Y <=50) return;
 
 
                     item.Move(point.ToWorkFlowPoint());
+                   
                     MakeCanvasFit((int)this.ActualWidth, (int)this.ActualHeight);
                 }
             };
             return item;
+
+        }
+        public WorkFlowPoint GetPosition()
+        {
+            var transform = this.TransformToVisual(zoomAndPanControl);
+            return transform.Transform(new Point(0, 0)).ToWorkFlowPoint();
 
         }
         public ILine CreateLine(IConnector start, IConnector end)
@@ -325,6 +327,13 @@ namespace WorkFlow.Wpf.WorkFlowItems.Controls
             var maxY = this.WorkFlowItems.Max(z => z.Position.Y);
             if (maxX + xPadding > minX) editorCanvas.Width = maxX + xPadding;
             if (maxY + yPadding > minY) editorCanvas.Height = maxY + yPadding;
+            var offsetXToRemove = zoomAndPanControl.ActualWidth + zoomAndPanControl.ContentOffsetX - editorCanvas.Width;
+            var offsetYToRemove = zoomAndPanControl.ActualHeight + zoomAndPanControl.ContentOffsetY - editorCanvas.Height;
+
+            if(offsetXToRemove>0) zoomAndPanControl.ContentOffsetX -= offsetXToRemove;
+            if(offsetYToRemove > 0) zoomAndPanControl.ContentOffsetY -= offsetYToRemove;
+
+
         }
 
 
@@ -340,5 +349,176 @@ namespace WorkFlow.Wpf.WorkFlowItems.Controls
             }
             return false;
         }
+
+
+
+        /// zoom pan
+        private MouseHandlingMode mouseHandlingMode = MouseHandlingMode.None;
+
+        /// <summary>
+        /// The point that was clicked relative to the ZoomAndPanControl.
+        /// </summary>
+        private Point origZoomAndPanControlMouseDownPoint;
+
+        /// <summary>
+        /// The point that was clicked relative to the content that is contained within the ZoomAndPanControl.
+        /// </summary>
+        private Point origContentMouseDownPoint;
+
+        /// <summary>
+        /// Records which mouse button clicked during mouse dragging.
+        /// </summary>
+        private MouseButton mouseButtonDown;
+        /// <summary>
+        /// Event raised on mouse down in the ZoomAndPanControl.
+        /// </summary>
+        private void zoomAndPanControl_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            editorCanvas.Focus();
+            Keyboard.Focus(editorCanvas);
+
+            mouseButtonDown = e.ChangedButton;
+            origZoomAndPanControlMouseDownPoint = e.GetPosition(zoomAndPanControl);
+            origContentMouseDownPoint = e.GetPosition(editorCanvas);
+
+            if ((Keyboard.Modifiers & ModifierKeys.Shift) != 0 &&
+                (e.ChangedButton == MouseButton.Left ||
+                 e.ChangedButton == MouseButton.Right))
+            {
+                // Shift + left- or right-down initiates zooming mode.
+                mouseHandlingMode = MouseHandlingMode.Zooming;
+            }
+            else if (mouseButtonDown == MouseButton.Left)
+            {
+                // Just a plain old left-down initiates panning mode.
+                mouseHandlingMode = MouseHandlingMode.Panning;
+            }
+
+            if (mouseHandlingMode != MouseHandlingMode.None)
+            {
+                // Capture the mouse so that we eventually receive the mouse up event.
+                zoomAndPanControl.CaptureMouse();
+                e.Handled = true;
+            }
+        }
+
+        /// <summary>
+        /// Event raised on mouse up in the ZoomAndPanControl.
+        /// </summary>
+        private void zoomAndPanControl_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            if (mouseHandlingMode != MouseHandlingMode.None)
+            {
+                if (mouseHandlingMode == MouseHandlingMode.Zooming)
+                {
+                    if (mouseButtonDown == MouseButton.Left)
+                    {
+                        // Shift + left-click zooms in on the content.
+                        ZoomIn();
+                    }
+                    else if (mouseButtonDown == MouseButton.Right)
+                    {
+                        // Shift + left-click zooms out from the content.
+                        ZoomOut();
+                    }
+                }
+
+                zoomAndPanControl.ReleaseMouseCapture();
+                mouseHandlingMode = MouseHandlingMode.None;
+                e.Handled = true;
+            }
+        }
+
+        /// <summary>
+        /// Event raised on mouse move in the ZoomAndPanControl.
+        /// </summary>
+        private void zoomAndPanControl_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (mouseHandlingMode == MouseHandlingMode.Panning)
+            {
+                //
+                // The user is left-dragging the mouse.
+                // Pan the viewport by the appropriate amount.
+                //
+                Point curContentMousePoint = e.GetPosition(editorCanvas);
+                Vector dragOffset = curContentMousePoint - origContentMouseDownPoint;
+
+                zoomAndPanControl.ContentOffsetX -= dragOffset.X;
+                zoomAndPanControl.ContentOffsetY -= dragOffset.Y;
+               
+                e.Handled = true;
+            }
+        }
+
+        /// <summary>
+        /// Event raised by rotating the mouse wheel
+        /// </summary>
+        private void zoomAndPanControl_MouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            e.Handled = true;
+
+            if (e.Delta > 0)
+            {
+                ZoomIn();
+            }
+            else if (e.Delta < 0)
+            {
+                ZoomOut();
+            }
+        }
+
+        /// <summary>
+        /// The 'ZoomIn' command (bound to the plus key) was executed.
+        /// </summary>
+        private void ZoomIn_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            ZoomIn();
+        }
+
+        /// <summary>
+        /// The 'ZoomOut' command (bound to the minus key) was executed.
+        /// </summary>
+        private void ZoomOut_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            ZoomOut();
+        }
+
+        /// <summary>
+        /// Zoom the viewport out by a small increment.
+        /// </summary>
+        private void ZoomOut()
+        {
+
+          
+           
+            var maxX = this.WorkFlowItems.Max(z => z.Position.X);
+            var maxY = this.WorkFlowItems.Max(z => z.Position.Y);
+            var xFits = zoomAndPanControl.ContentViewportWidth > maxX;
+            var yFits = zoomAndPanControl.ContentViewportHeight > maxY;
+            if (!xFits && !yFits) zoomAndPanControl.ContentScale -= 0.1;
+            else if (!xFits)
+            {
+                if (editorCanvas.ActualHeight < this.ActualHeight) editorCanvas.Height = this.ActualHeight;
+                zoomAndPanControl.ContentScale -= 0.1;
+            }
+            else if (!yFits)
+            {
+                if (editorCanvas.ActualWidth < this.ActualWidth) editorCanvas.Width = this.ActualWidth;
+                zoomAndPanControl.ContentScale -= 0.1;
+            }
+
+        }
+
+        /// <summary>
+        /// Zoom the viewport in by a small increment.
+        /// </summary>
+        private void ZoomIn()
+        {
+            zoomAndPanControl.ContentScale += 0.1;
+        }
+
+        /// <summary>
+
+        //end of zoom pan
     }
 }

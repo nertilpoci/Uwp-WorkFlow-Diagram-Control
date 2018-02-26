@@ -161,136 +161,139 @@ namespace WorkFlow.WorkFlowItems.Controls
         }
         private IWorkFlowItem CreateNewNode(Type type, string title, string description)
         {
-            IWorkFlowItem item = (IWorkFlowItem)Activator.CreateInstance(type, editorCanvas);
-            item.UIElement.GetUiElement<FrameworkElement>().RenderTransform = new TranslateTransform();
-            item.ItemContent.ItemContentContext.Title =title;
-            item.ItemContent.ItemContentContext.Description = description;
-
-            foreach (var connector in item.Connectors)
+            if (Activator.CreateInstance(type, editorCanvas) is IWorkFlowItem item)
             {
-                connector.UIElement.GetUiElement<FrameworkElement>().PointerEntered += (s, e) => {
-                    connector.MouseIn();
-                };
-                item.UIElement.GetUiElement<FrameworkElement>().PointerExited += (s, e) => {
-                    connector.MouseOut();
-                };
+                item.UIElement.GetUiElement<FrameworkElement>().RenderTransform = new TranslateTransform();
+                item.ItemContent.ItemContentContext.Title = title;
+                item.ItemContent.ItemContentContext.Description = description;
 
-                if (connector.Type == ConnectorType.Out)
+                foreach (var connector in item.Connectors)
                 {
-                    connector.UIElement.GetUiElement<FrameworkElement>().PointerPressed += (s, e) =>
-                    {
-                        e.Handled = true;
-                        connector.Point = e.GetCurrentPoint(editorCanvas).Position.CreateWorkFlowPoint();
-
-                        MovingLine =CreateLine(connector, null);
-                        connector.Lines.Add(MovingLine);
-                        editorCanvas.Children.Add(MovingLine.UIElement.GetUiElement<FrameworkElement>());
-                        SetResetConnectorCanConnect(MovingLine,WorkFlowItems);
+                    connector.UIElement.GetUiElement<FrameworkElement>().PointerEntered += (s, e) => {
+                        connector.MouseIn();
+                    };
+                    item.UIElement.GetUiElement<FrameworkElement>().PointerExited += (s, e) => {
+                        connector.MouseOut();
                     };
 
-                    connector.UIElement.GetUiElement<FrameworkElement>().PointerReleased += (s, e) =>
+                    if (connector.Type == ConnectorType.Out)
                     {
-                        ConnectionCreateCleanup();
-                    };
-                }
-                else
-                {
-                    connector.UIElement.GetUiElement<FrameworkElement>().PointerReleased += (s, e) =>
-                    {
-
-                        if (MovingLine != null)
+                        connector.UIElement.GetUiElement<FrameworkElement>().PointerPressed += (s, e) =>
                         {
                             e.Handled = true;
+                            connector.Point = e.GetCurrentPoint(editorCanvas).Position.CreateWorkFlowPoint();
 
-                            if(!connector.CanConnect(MovingLine))
+                            MovingLine = CreateLine(connector, null);
+                            connector.Lines.Add(MovingLine);
+                            editorCanvas.Children.Add(MovingLine.UIElement.GetUiElement<FrameworkElement>());
+                            SetResetConnectorCanConnect(MovingLine, WorkFlowItems);
+                        };
+
+                        connector.UIElement.GetUiElement<FrameworkElement>().PointerReleased += (s, e) =>
+                        {
+                            ConnectionCreateCleanup();
+                        };
+                    }
+                    else
+                    {
+                        connector.UIElement.GetUiElement<FrameworkElement>().PointerReleased += (s, e) =>
+                        {
+
+                            if (MovingLine != null)
                             {
-                                ConnectionCreateCleanup();
-                                return;
-                            }
+                                e.Handled = true;
 
-                            if (IsLoop(MovingLine.Start,connector))
-                            {
-                                OnLoopDetected(new WorkFlowLoopEventModel(MovingLine.Start, connector));
-
-                                if (!AllowLoops)
+                                if (!connector.CanConnect(MovingLine))
                                 {
                                     ConnectionCreateCleanup();
                                     return;
                                 }
-                              
+
+                                if (IsLoop(MovingLine.Start, connector))
+                                {
+                                    OnLoopDetected(new WorkFlowLoopEventModel(MovingLine.Start, connector));
+
+                                    if (!AllowLoops)
+                                    {
+                                        ConnectionCreateCleanup();
+                                        return;
+                                    }
+
+                                }
+
+                                connector.Point = e.GetCurrentPoint(editorCanvas).Position.CreateWorkFlowPoint();
+                                MovingLine.End = connector;
+                                MovingLine.DrawPath(MovingLine.Start.Point, MovingLine.End.Point);
+                                connector.Lines.Add(MovingLine);
+
+                                MovingLine = new LineItem();
+                                MovingLine = null;
+                                SetResetConnectorCanConnect(null, WorkFlowItems);
+
                             }
-
-                            connector.Point = e.GetCurrentPoint(editorCanvas).Position.CreateWorkFlowPoint();
-                            MovingLine.End = connector;
-                            MovingLine.DrawPath(MovingLine.Start.Point, MovingLine.End.Point);
-                            connector.Lines.Add(MovingLine);
-
-                            MovingLine = new LineItem();
-                            MovingLine = null;
-                            SetResetConnectorCanConnect(null, WorkFlowItems);
-
-                        }
-                    };
+                        };
+                    }
                 }
+
+
+                item.UIElement.GetUiElement<FrameworkElement>().PointerPressed += (s, e) =>
+                {
+                    e.Handled = true;
+                    var sender = s as FrameworkElement;
+                    sender.CapturePointer(e.Pointer);
+                };
+
+                item.UIElement.GetUiElement<FrameworkElement>().PointerReleased += (s, e) =>
+                {
+                    e.Handled = true;
+                    var sender = s as FrameworkElement;
+                    sender.ReleasePointerCapture(e.Pointer);
+                    ConnectionCreateCleanup();
+                };
+
+                item.UIElement.GetUiElement<FrameworkElement>().PointerMoved += (s, e) =>
+                {
+                    editorCanvas.Width = editorCanvas.ActualWidth;
+                    editorCanvas.Height = editorCanvas.ActualHeight;
+                    scroller.Width = scroller.ActualWidth;
+                    scroller.Height = scroller.ActualHeight;
+
+                    e.Handled = true;
+                    var sender = s as FrameworkElement;
+                    if (sender.PointerCaptures != null && sender.PointerCaptures.Any())
+                    {
+                        var point = e.GetCurrentPoint(editorCanvas).Position;
+
+                        if (point.X >= editorCanvas.Width - ItemWidth)
+                        {
+                            editorCanvas.Width += 50; scroller.ChangeView(editorCanvas.Width, null, scroller.ZoomFactor);
+                        }
+                        if (point.Y >= editorCanvas.Height - ItemHeight) { editorCanvas.Height += 50; scroller.ChangeView(null, editorCanvas.Height, scroller.ZoomFactor); }
+
+
+                        if (point.X >= scroller.ActualWidth + scroller.HorizontalOffset - ItemWidth)
+                        {
+                            scroller.ChangeView(scroller.HorizontalOffset + 50, null, scroller.ZoomFactor);
+                        }
+                        if (point.Y >= scroller.VerticalOffset + scroller.ActualHeight - ItemHeight) { scroller.ChangeView(null, scroller.VerticalOffset + 50, scroller.ZoomFactor); }
+
+
+                        if (point.X < scroller.HorizontalOffset + ItemWidth / 2)
+                        {
+                            scroller.ChangeView(scroller.HorizontalOffset - 20, null, scroller.ZoomFactor);
+                        }
+                        if (point.Y < scroller.VerticalOffset + ItemHeight / 2) { scroller.ChangeView(null, scroller.VerticalOffset - 20, scroller.ZoomFactor); }
+
+
+                        
+                        item.Move(point.CreateWorkFlowPoint());
+                        MakeCanvasFit((int)this.ActualWidth, (int)this.ActualHeight);
+                    }
+                };
+                return item;
             }
 
-
-            item.UIElement.GetUiElement<FrameworkElement>().PointerPressed += (s, e) =>
-            {
-                e.Handled = true;
-                var sender = s as FrameworkElement;
-                sender.CapturePointer(e.Pointer);
-            };
-
-            item.UIElement.GetUiElement<FrameworkElement>().PointerReleased += (s, e) =>
-            {
-                e.Handled = true;
-                var sender = s as FrameworkElement;
-                sender.ReleasePointerCapture(e.Pointer);
-                ConnectionCreateCleanup();
-            };
-
-            item.UIElement.GetUiElement<FrameworkElement>().PointerMoved += (s, e) =>
-            {
-                editorCanvas.Width = editorCanvas.ActualWidth;
-                editorCanvas.Height = editorCanvas.ActualHeight;
-                scroller.Width = scroller.ActualWidth;
-                scroller.Height = scroller.ActualHeight;
-
-                e.Handled = true;
-                var sender = s as FrameworkElement;
-                if (sender.PointerCaptures != null && sender.PointerCaptures.Any())
-                {
-                    var point = e.GetCurrentPoint(editorCanvas).Position;
-
-                    if (point.X >= editorCanvas.Width - ItemWidth)
-                    {
-                        editorCanvas.Width += 50; scroller.ChangeView(editorCanvas.Width, null, scroller.ZoomFactor);
-                    }
-                    if (point.Y >= editorCanvas.Height - ItemHeight) { editorCanvas.Height += 50; scroller.ChangeView(null, editorCanvas.Height, scroller.ZoomFactor); }
-
-
-                    if (point.X >= scroller.ActualWidth + scroller.HorizontalOffset - ItemWidth)
-                    {
-                        scroller.ChangeView(scroller.HorizontalOffset + 50, null, scroller.ZoomFactor);
-                    }
-                    if (point.Y >= scroller.VerticalOffset + scroller.ActualHeight - ItemHeight) { scroller.ChangeView(null, scroller.VerticalOffset + 50, scroller.ZoomFactor); }
-
-
-                    if (point.X < scroller.HorizontalOffset + ItemWidth/2 )
-                    {
-                        scroller.ChangeView(scroller.HorizontalOffset - 20, null, scroller.ZoomFactor);
-                    }
-                    if (point.Y <scroller.VerticalOffset + ItemHeight/2) { scroller.ChangeView(null, scroller.VerticalOffset - 20, scroller.ZoomFactor); }
-
-
-
-                    item.Move(point.CreateWorkFlowPoint());
-                    MakeCanvasFit((int)this.ActualWidth, (int)this.ActualHeight);
-                }
-            };
-            return item;
-          
+          return null;
         }
         public  ILine CreateLine(IConnector start, IConnector end)
         {

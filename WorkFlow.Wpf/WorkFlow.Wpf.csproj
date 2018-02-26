@@ -169,6 +169,10 @@
       <Project>{ba0edd8e-ab2c-40f3-9a0f-fddbc3f83108}</Project>
       <Name>Workflow.Common</Name>
     </ProjectReference>
+    <ProjectReference Include="..\ZoomAndPan\ZoomAndPan.csproj">
+      <Project>{468adede-6f5e-40c0-99c9-c6dac4fac934}</Project>
+      <Name>ZoomAndPan</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

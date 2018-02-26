@@ -4,14 +4,22 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
               xmlns:enums="clr-namespace:Workflow.Common.Enums;assembly=Workflow.Common"
-             mc:Ignorable="d" 
+             xmlns:ZoomAndPan="clr-namespace:ZoomAndPan;assembly=ZoomAndPan"
+             mc:Ignorable="d"  Name="workfloweditor"
              d:DesignHeight="300" d:DesignWidth="300">
     <Grid Name="container"    HorizontalAlignment="Stretch"  VerticalAlignment="Stretch" >
 
         <DockPanel  LastChildFill="True" >
-            <ScrollViewer  HorizontalAlignment="Stretch"  VerticalAlignment="Stretch" Name="scroller" Background="Red" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden">
 
-                <Canvas Background="#EFEFEF" MinHeight="300" MinWidth="300"    x:Name="editorCanvas" >
+            <ZoomAndPan:ZoomAndPanControl     Background="White" HorizontalContentAlignment="Left"  VerticalContentAlignment="Top" HorizontalAlignment="Left" VerticalAlignment="Top"     MinWidth="{Binding ActualWidth, ElementName=workfloweditor, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" MinHeight="{Binding ActualHeight, ElementName=workfloweditor, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"  
+            x:Name="zoomAndPanControl"
+            MouseDown="zoomAndPanControl_MouseDown"
+            MouseUp="zoomAndPanControl_MouseUp"
+            MouseMove="zoomAndPanControl_MouseMove"
+            MouseWheel="zoomAndPanControl_MouseWheel"
+            >
+
+                <Canvas Background="#EFEFEF" HorizontalAlignment="Left" VerticalAlignment="Top"    x:Name="editorCanvas" MinWidth="{Binding ActualWidth, ElementName=workfloweditor, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" MinHeight="{Binding ActualHeight, ElementName=workfloweditor, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" >
 
                     <Canvas.ContextMenu>
                         <ContextMenu >
@@ -24,7 +32,9 @@
                     </Canvas.ContextMenu>
 
                 </Canvas>
-            </ScrollViewer>
+            </ZoomAndPan:ZoomAndPanControl>
+
+            
         </DockPanel>
 
 
